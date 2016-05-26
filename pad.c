@@ -20,13 +20,15 @@ setup_pad(void)
          0.0f,  0.5f, 0.0f
     };
 
+    /* create vertex store buffer */
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+
+    /* setup a vao */
     GLuint vao;
     glGenVertexArrays(1, &vao);
 
     glBindVertexArray(vao);
-
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
@@ -42,8 +44,10 @@ setup_pad(void)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
             3 * sizeof (GLfloat), (GLvoid *) 0);
 
+    /* place data on shader location 0 */
     glEnableVertexAttribArray(0);
 
+    /* unbind vao */
     glBindVertexArray(0);
 
     struct pad *t = malloc(sizeof *t);
