@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <GLES3/gl3.h>
+#include <GL/gl.h>
 
 #include "linmath.h"
 

@@ -1,8 +1,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 
-#include <GLES3/gl3.h>
+#include <GL/gl.h>
 #include <GLFW/glfw3.h>
 
 #include "shader.h"

@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-g -I.
-LFLAGS=-lGLESv2 -lglfw -lm
+LFLAGS=-lGL -lglfw -lm
 TARGET=main
 
 sources = $(wildcard *.c)
