@@ -15,6 +15,8 @@ enum {
     WINDOW_HEIGHT = 600
 };
 
+static struct pad *pad = NULL;
+
 static void
 handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
@@ -54,24 +56,51 @@ create_window(void)
     return window;
 }
 
-typedef void (*draw_func)(GLuint shader_program);
+typedef void (*draw_func)(void *object, GLuint shader_program);
+
+struct draw_ctx
+{
+    draw_func func;
+    void **object;
+};
 
 static draw_func draw_functions[] = { draw_pad, NULL };
+
+static struct draw_ctx draw_contexts[] = {
+    { draw_pad, (void **) &pad },
+    NULL
+};
 
 static void
 draw(GLuint shader_program)
 {
-    draw_func *f;
+    struct draw_ctx *ctx;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    f = draw_functions;
+    ctx = draw_contexts;
 
-    while (*f) {
-        (*f)(shader_program);
-        ++f;
+    while (ctx->func) {
+        ctx->func(*ctx->object, shader_program);
+        ++ctx;
     }
+}
+
+static void
+init_objects(void)
+{
+    assert(pad == NULL);
+
+    pad = pad_new();
+}
+
+static void
+free_objects(void)
+{
+    assert(pad != NULL);
+
+    pad_free(pad);
 }
 
 int main(int argc, char *argv[])
@@ -79,6 +108,8 @@ int main(int argc, char *argv[])
     init_glfw();
 
     GLFWwindow *window = create_window();
+
+    init_objects();
 
     glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -93,6 +124,8 @@ int main(int argc, char *argv[])
 
         glfwSwapBuffers(window);
     }
+
+    free_objects();
 
     glfwTerminate();
 

@@ -1,18 +1,11 @@
 #include <stdlib.h>
 #include <GL/gl.h>
 
+#include "pad.h"
 #include "linmath.h"
 
-struct pad
-{
-    GLuint vao;
-    GLuint vbo;
-};
-
-static struct pad *pad = NULL;
-
-static struct pad *
-setup_pad(void)
+struct pad *
+pad_new(void)
 {
     static GLfloat vertices[] = {
         -0.5f, -0.5f, 0.0f,
@@ -57,8 +50,8 @@ setup_pad(void)
     return t;
 }
 
-static void
-free_pad(struct pad *t)
+void
+pad_free(struct pad *t)
 {
     glDeleteVertexArrays(1, &t->vao);
     glDeleteBuffers(1, &t->vbo);
@@ -67,11 +60,9 @@ free_pad(struct pad *t)
 }
 
 void
-draw_pad(GLuint shader_program)
+draw_pad(void *object, GLuint shader_program)
 {
-    /* FIXME */
-    if (pad == NULL)
-        pad = setup_pad();
+    struct pad *pad = (struct pad *) object;
 
     //XXX FIXME
     static mat4x4 model_matrix;
