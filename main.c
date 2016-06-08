@@ -83,6 +83,37 @@ init_glfw(void)
     window = create_window();
 }
 
+typedef void (*update_func)(void *object);
+
+struct update_ctx
+{
+    update_func func;
+    void **object;
+};
+
+static struct update_ctx update_contexts[] = {
+    { pad_update, (void **) &pad },
+    NULL
+};
+
+static void
+update(void)
+{
+    struct update_ctx *ctx;
+
+    if (pad_state & PAD_LEFT)
+        pad_throttle_left(pad);
+    if (pad_state & PAD_RIGHT)
+        pad_throttle_right(pad);
+
+    ctx = update_contexts;
+
+    while (ctx->func) {
+        ctx->func(*ctx->object);
+        ++ctx;
+    }
+}
+
 typedef void (*draw_func)(void *object, GLuint shader_program);
 
 struct draw_ctx
@@ -95,17 +126,6 @@ static struct draw_ctx draw_contexts[] = {
     { pad_draw, (void **) &pad },
     NULL
 };
-
-static void
-update(void)
-{
-    if (pad_state & PAD_LEFT)
-        pad_throttle_left(pad);
-    if (pad_state & PAD_RIGHT)
-        pad_throttle_right(pad);
-
-    pad_update(pad);
-}
 
 static void
 draw(GLuint shader_program)
