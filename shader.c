@@ -12,6 +12,7 @@
 #include <assert.h>
 
 #include "panic.h"
+#include "shader.h"
 
 static GLuint
 install_shader(const GLchar **source, GLenum type, GLint size)
@@ -114,3 +115,9 @@ load_shaders(void)
     return shader_program;
 }
 
+void
+shader_set_uniform_m4(GLuint shader_program, const char *uniform, mat4x4 m)
+{
+    GLint location = glGetUniformLocation(shader_program, uniform);
+    glUniformMatrix4fv(location, 1, GL_FALSE, (const GLfloat *) m);
+}

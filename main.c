@@ -10,6 +10,7 @@
 #include "pad.h"
 #include "panic.h"
 #include "constants.h"
+#include "linmath.h"
 
 static GLFWwindow *window = NULL;
 
@@ -81,6 +82,8 @@ init_glfw(void)
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
     window = create_window();
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 typedef void (*update_func)(void *object);
@@ -128,6 +131,25 @@ static struct draw_ctx draw_contexts[] = {
 };
 
 static void
+setup_uniforms(GLuint shader_program)
+{
+    /* FIXME place this in a proper place */
+
+    /* view matrix */
+    mat4x4 view_matrix;
+    mat4x4_translate(view_matrix, 0.0, -6.5, -20.0);
+
+    shader_set_uniform_m4(shader_program, "view", view_matrix);
+
+    /* projection matrix */
+    mat4x4 projection_matrix;
+    mat4x4_perspective(projection_matrix, M_PI/4, VIEWPORT_WIDTH/VIEWPORT_HEIGHT, 0.1f, 100.f);
+    //mat4x4_ortho(projection_matrix, 0.0, 800.0, 0.0, 600.0, 0.1, 100.0);
+
+    shader_set_uniform_m4(shader_program, "projection", projection_matrix);
+}
+
+static void
 draw(GLuint shader_program)
 {
     struct draw_ctx *ctx;
@@ -135,9 +157,9 @@ draw(GLuint shader_program)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    ctx = draw_contexts;
+    setup_uniforms(shader_program);
 
-    while (ctx->func) {
+    for (ctx = draw_contexts; ctx->func; ++ctx) {
         ctx->func(*ctx->object, shader_program);
         ++ctx;
     }
