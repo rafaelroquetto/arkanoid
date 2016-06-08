@@ -10,6 +10,7 @@
 
 #include "panic.h"
 #include "bytearray.h"
+#include "linmath.h"
 
 #include "model.h"
 
@@ -27,10 +28,7 @@ model_new(void)
 void
 model_free(struct model *m)
 {
-    free(m->vertices);
-    free(m->normals);
-    free(m->indices);
-
+    free(m->coords);
     free(m);
 }
 
@@ -151,20 +149,47 @@ parse_vertex(struct byte_array *dest)
 }
 
 static void
-parse_face(struct byte_array *faces)
+face_to_indices(const char *face, GLuint *ivertex,
+        GLuint *itexture, GLuint *inormal)
+{
+    const char *ptr = face;
+
+    *ivertex = atoi(ptr);
+
+    ptr = strchr(face, '/');
+    ++ptr;
+
+    *itexture = atoi(ptr);
+
+    ptr = strchr(ptr, '/');
+    ++ptr;
+
+    *inormal = atoi(ptr);
+}
+
+static void
+parse_face_component(struct byte_array *faces)
 {
     char *token;
 
     GLuint coord;
+    GLuint ivertex;
+    GLuint itexture;
+    GLuint inormal;
 
     token = strtok(NULL, " ");
-    byte_array_append_int(faces, (GLuint) atoi(token));
+    face_to_indices(token, &ivertex, &itexture, &inormal);
+    byte_array_append_int(faces, ivertex);
+    byte_array_append_int(faces, itexture);
+    byte_array_append_int(faces, inormal);
+}
 
-    token = strtok(NULL, " ");
-    byte_array_append_int(faces, (GLuint) atoi(token));
-
-    token = strtok(NULL, " ");
-    byte_array_append_int(faces, (GLuint) atoi(token));
+static void
+parse_face(struct byte_array *faces)
+{
+    parse_face_component(faces); /* first */
+    parse_face_component(faces); /* second */
+    parse_face_component(faces); /* third */
 }
 
 static void
@@ -174,6 +199,12 @@ parse_line(char *line, struct byte_array *vertices,
     char *token;
 
     if (line[0] == '#' || line[0] == 'o')
+        return;
+
+    while (*line == ' ')
+        line++;
+
+    if (strlen(line) == 0)
         return;
 
     token = strtok(line, " ");
@@ -208,6 +239,105 @@ byte_array_to_int_array(struct byte_array *b, GLuint **int_array)
     return b->size / sizeof (GLuint);
 }
 
+
+/* the index_data has the following format
+ *
+ *   0   1   2   3   4   5   6   7   8
+ * +---+---+---+---+---+---+---+---+---+
+ * | x | t | n | y | t | n | z | t | n |
+ * +---+---+---+---+---+---+---+---+---+
+ *
+ * for a given vertex
+ * where {x ,y, z} are the indices into the vertex_data
+ * for each component, and t and n are the indices into
+ * the texture and normal data arrays for the given component.
+ *
+ * We therefore have a stride of 9 elements per vertex, and 3 elements
+ * per coordinate index
+ */
+
+enum Coords {
+    COORD_X = 0,
+    COORD_Y = 1,
+    COORD_Z = 2
+};
+
+enum {
+    COORD_STRIDE = 3,
+    INDEX_STRIDE = 3,
+    VERTEX_OFFSET = 0,
+    TEXTURE_OFFSET = 1,
+    NORMAL_OFFSET = 2
+};
+
+static GLfloat
+vertex_coord(const GLfloat *vertex_data, const GLuint *index_data,
+        int coord, int vertex)
+{
+    const unsigned int offset = vertex * INDEX_STRIDE + VERTEX_OFFSET;
+    const unsigned int vertex_index = index_data[offset] - 1; /* 0-based indices */
+    const unsigned int vertex_offset = vertex_index * COORD_STRIDE + coord;
+
+    return vertex_data[vertex_offset];
+}
+
+static GLfloat
+normal_coord(const GLfloat *normal_data, const GLuint *index_data,
+        int coord, int vertex)
+{
+    const unsigned int offset = vertex * INDEX_STRIDE + NORMAL_OFFSET;
+    const unsigned int normal_index = index_data[offset] - 1; /* 0-based indices */
+    const unsigned int normal_offset = normal_index * COORD_STRIDE + coord;
+
+    return normal_data[normal_index];
+}
+
+static void
+setup_model(struct model *m, struct byte_array *vertices,
+        struct byte_array *normals, struct byte_array *indices)
+{
+    size_t vcount;
+    size_t ncount;
+    size_t icount;
+    size_t buffer_size;
+    int i;
+    int nvertex;
+    int current_coord;
+
+    GLfloat *vertex_data;
+    GLfloat *normal_data;
+    GLuint *index_data;
+    GLfloat *buffer;
+
+    vcount = byte_array_to_float_array(vertices, &vertex_data);
+    ncount = byte_array_to_float_array(normals, &normal_data);
+    icount = byte_array_to_int_array(indices, &index_data);
+
+    /* icount holds the total number of components of each index
+     * i.e. icount = number of vertex * 3 (vertex index, texture index and
+     * normal index).
+     */
+    buffer_size = icount * 2 * sizeof (GLfloat);
+    nvertex = icount / 3;
+
+    /* size of vertices + size of normals */
+    buffer = (GLfloat *) malloc(buffer_size);
+
+    for (current_coord = i = 0; i < nvertex; ++i) {
+        buffer[current_coord++] = vertex_coord(vertex_data, index_data, COORD_X, i);
+        buffer[current_coord++] = vertex_coord(vertex_data, index_data, COORD_Y, i);
+        buffer[current_coord++] = vertex_coord(vertex_data, index_data, COORD_Z, i);
+
+        buffer[current_coord++] = normal_coord(normal_data, index_data, COORD_X, i);
+        buffer[current_coord++] = normal_coord(normal_data, index_data, COORD_Y, i);
+        buffer[current_coord++] = normal_coord(normal_data, index_data, COORD_Z, i);
+    }
+
+    m->coords = buffer;
+    m->csize = buffer_size;
+    m->nvertex = nvertex;
+}
+
 struct model *
 load_model(const char *path)
 {
@@ -240,9 +370,7 @@ load_model(const char *path)
 
     model = model_new();
 
-    model->vsize = byte_array_to_float_array(vertices, &model->vertices);
-    model->nsize = byte_array_to_float_array(normals, &model->normals);
-    model->isize = byte_array_to_int_array(faces, &model->indices);
+    setup_model(model, vertices, normals, faces);
 
     byte_array_free(vertices);
     byte_array_free(normals);

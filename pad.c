@@ -43,10 +43,6 @@ pad_new(void)
 {
     struct model *model = pad_model();
 
-    /* create index store buffer */
-    GLuint ebo;
-    glGenBuffers(1, &ebo);
-
     /* create vertex store buffer */
     GLuint vbo;
     glGenBuffers(1, &vbo);
@@ -57,11 +53,8 @@ pad_new(void)
 
     glBindVertexArray(vao);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, model->isize * sizeof (GLuint), model->indices, GL_STATIC_DRAW);
-
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, model->vsize * sizeof (GLfloat), model->vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, model->csize, model->coords, GL_STATIC_DRAW);
 
     /*  - location of position vertex attrib
      *  - size of vertex attrib (vec3)
@@ -70,11 +63,18 @@ pad_new(void)
      *  - stride
      *  - data offset in the buffer
      */
+
+    /* vertices */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-            3 * sizeof (GLfloat), (GLvoid *) 0);
+            6 * sizeof (GLfloat), (GLvoid *) 0);
 
     /* place data on shader location 0 */
     glEnableVertexAttribArray(0);
+
+    /* normals */
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+            6 * sizeof (GLfloat), (GLvoid *) (3 * sizeof (GLfloat)));
+    glEnableVertexAttribArray(1);
 
     /* unbind vao */
     glBindVertexArray(0);
@@ -82,10 +82,9 @@ pad_new(void)
     struct pad *p = malloc(sizeof *p);
     p->vao = vao;
     p->vbo = vbo;
-    p->ebo = ebo;
-    p->ebo_count = model->isize;
     p->x = 0.0;
     p->speed = 0.0;
+    p->vertex_count = model->nvertex;
 
     return p;
 }
@@ -107,14 +106,13 @@ pad_draw(void *object, GLuint shader_program)
 
     mat4x4 model_matrix;
     mat4x4_translate(model_matrix, pad->x, 0.0, 0.0);
-    mat4x4_rotate_Z(model_matrix, model_matrix, deg_to_rad(60.0));
-    //mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
+    //mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(60.0));
+    mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
 
     shader_set_uniform_m4(shader_program, "model", model_matrix);
 
     glBindVertexArray(pad->vao);
-    //glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-    glDrawElements(GL_TRIANGLES, pad->ebo_count, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, pad->vertex_count);
     glBindVertexArray(0);
 }
 

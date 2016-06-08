@@ -11,7 +11,7 @@ struct pad
     GLuint vao;
     GLuint vbo;
     GLuint ebo;
-    GLsizei ebo_count;
+    GLsizei vertex_count;
 };
 
 struct pad * pad_new(void);
