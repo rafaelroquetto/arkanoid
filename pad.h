@@ -1,6 +1,8 @@
 #ifndef PAD_H
 #define PAD_H
 
+#include <GL/gl.h>
+
 struct pad
 {
     GLfloat x;
@@ -8,6 +10,8 @@ struct pad
 
     GLuint vao;
     GLuint vbo;
+    GLuint ebo;
+    GLsizei ebo_count;
 };
 
 struct pad * pad_new(void);
