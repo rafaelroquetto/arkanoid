@@ -239,23 +239,6 @@ byte_array_to_int_array(struct byte_array *b, GLuint **int_array)
     return b->size / sizeof (GLuint);
 }
 
-
-/* the index_data has the following format
- *
- *   0   1   2   3   4   5   6   7   8
- * +---+---+---+---+---+---+---+---+---+
- * | x | t | n | y | t | n | z | t | n |
- * +---+---+---+---+---+---+---+---+---+
- *
- * for a given vertex
- * where {x ,y, z} are the indices into the vertex_data
- * for each component, and t and n are the indices into
- * the texture and normal data arrays for the given component.
- *
- * We therefore have a stride of 9 elements per vertex, and 3 elements
- * per coordinate index
- */
-
 enum Coords {
     COORD_X = 0,
     COORD_Y = 1,
