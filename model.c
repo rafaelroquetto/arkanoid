@@ -152,16 +152,26 @@ static void
 face_to_indices(const char *face, GLuint *ivertex,
         GLuint *itexture, GLuint *inormal)
 {
+    *ivertex = *itexture = *inormal = 0;
+
     const char *ptr = face;
 
     *ivertex = atoi(ptr);
 
-    ptr = strchr(face, '/');
+    ptr = strchrnul(face, '/');
+
+    if (ptr == NULL)
+        return;
+
     ++ptr;
 
     *itexture = atoi(ptr);
 
-    ptr = strchr(ptr, '/');
+    ptr = strchrnul(ptr, '/');
+
+    if (ptr == NULL)
+        return;
+
     ++ptr;
 
     *inormal = atoi(ptr);

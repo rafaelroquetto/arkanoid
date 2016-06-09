@@ -7,6 +7,7 @@ struct pad
 {
     GLfloat x;
     GLfloat speed;
+    GLint angle;
 
     GLuint vao;
     GLuint vbo;
@@ -21,5 +22,6 @@ void pad_draw(void *object, GLuint shader_program);
 void pad_update(void *object);
 void pad_throttle_left(struct pad *p);
 void pad_throttle_right(struct pad *p);
+void pad_rotate_x(struct pad *p);
 
 #endif /* PAD_H */

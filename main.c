@@ -40,6 +40,8 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
             pad_state |= PAD_LEFT;
         } else if (key == GLFW_KEY_RIGHT) {
             pad_state |= PAD_RIGHT;
+        } else if (key == GLFW_KEY_UP) {
+            pad_state |= PAD_UP;
         }
 
         break;
@@ -49,6 +51,8 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
             pad_state &= ~PAD_LEFT;
         } else if (key == GLFW_KEY_RIGHT) {
             pad_state &= ~PAD_RIGHT;
+        } else if (key == GLFW_KEY_UP) {
+            pad_state &= ~PAD_UP;
         }
 
         break;
@@ -108,6 +112,8 @@ update(void)
         pad_throttle_left(pad);
     if (pad_state & PAD_RIGHT)
         pad_throttle_right(pad);
+    if (pad_state & PAD_UP)
+        pad_rotate_x(pad);
 
     ctx = update_contexts;
 

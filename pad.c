@@ -85,6 +85,7 @@ pad_new(void)
     p->x = 0.0;
     p->speed = 0.0;
     p->vertex_count = model->nvertex;
+    p->angle = 0.0;
 
     return p;
 }
@@ -105,11 +106,17 @@ pad_draw(void *object, GLuint shader_program)
     struct pad *pad = (struct pad *) object;
 
     mat4x4 model_matrix;
-    mat4x4_translate(model_matrix, pad->x, 0.0, 0.0);
-    //mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(60.0));
-    mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
+    //mat4x4_translate(model_matrix, pad->x, 0.0, 0.0);
+    mat4x4_translate(model_matrix, -0.5, 0.0, 0.0);
+    mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(pad->angle));
+    //mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
+
+    mat4x4 normal_matrix;
+    mat4x4_invert(normal_matrix, model_matrix);
+    mat4x4_transpose(normal_matrix, normal_matrix);
 
     shader_set_uniform_m4(shader_program, "model", model_matrix);
+    shader_set_uniform_m4(shader_program, "normalModel", normal_matrix);
 
     glBindVertexArray(pad->vao);
     glDrawArrays(GL_TRIANGLES, 0, pad->vertex_count);
@@ -160,3 +167,10 @@ pad_throttle_right(struct pad *p)
         p->speed = MAX_SPEED;
 }
 
+void
+pad_rotate_x(struct pad *p)
+{
+    p->angle += 10;
+
+    p->angle = p->angle % 360;
+}
