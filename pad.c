@@ -7,9 +7,9 @@
 #include "shader.h"
 #include "model.h"
 
-static const GLfloat PAD_THROTTLE = 0.1f;
-static const GLfloat MAX_SPEED = 0.3f;
-static const GLfloat PAD_FRICTION = 0.01f;
+static const GLfloat PAD_THROTTLE = 0.3f;
+static const GLfloat MAX_SPEED = 0.9f;
+static const GLfloat PAD_FRICTION = 0.04f;
 
 static inline
 float deg_to_rad(float deg)
@@ -106,10 +106,9 @@ pad_draw(void *object, GLuint shader_program)
     struct pad *pad = (struct pad *) object;
 
     mat4x4 model_matrix;
-    //mat4x4_translate(model_matrix, pad->x, 0.0, 0.0);
-    mat4x4_translate(model_matrix, -0.5, 0.0, 0.0);
+    mat4x4_translate(model_matrix, pad->x, 0.0, 0.0);
     mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(pad->angle));
-    //mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
+    mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
 
     mat4x4 normal_matrix;
     mat4x4_invert(normal_matrix, model_matrix);

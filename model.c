@@ -282,7 +282,7 @@ normal_coord(const GLfloat *normal_data, const GLuint *index_data,
     const unsigned int normal_index = index_data[offset] - 1; /* 0-based indices */
     const unsigned int normal_offset = normal_index * COORD_STRIDE + coord;
 
-    return normal_data[normal_index];
+    return normal_data[normal_offset];
 }
 
 static void
