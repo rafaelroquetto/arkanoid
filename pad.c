@@ -6,6 +6,7 @@
 #include "constants.h"
 #include "shader.h"
 #include "model.h"
+#include "mesh.h"
 
 static const GLfloat PAD_THROTTLE = 0.8f;
 static const GLfloat MAX_SPEED = 2.0f;
@@ -26,67 +27,46 @@ fuzzy_compare(double a, double b)
     return fabs(a - b) < EPSILON;
 }
 
-static struct model *
-pad_model(void)
+static int mesh_ref_count = 0;
+static struct mesh *mesh = NULL;
+
+static struct mesh *
+pad_mesh(void)
 {
-    static struct model *m = NULL;
 
-    if (m != NULL)
-        return m;
+    if (mesh != NULL) {
+        ++mesh_ref_count;
+        return mesh;
+    }
 
-    m = load_model("resource/pad.obj");
+    mesh = mesh_load("resource/pad.obj");
 
-    return m;
+    return mesh;
+}
+
+static void
+pad_mesh_free(void)
+{
+    if (mesh == NULL)
+        return;
+
+    --mesh_ref_count;
+
+    if (mesh_ref_count == 0) {
+        mesh_free(mesh);
+        mesh = NULL;
+    }
 }
 
 struct pad *
 pad_new(void)
 {
-    struct model *model = pad_model();
-
-    /* create vertex store buffer */
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-
-    /* setup a vao */
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, model->csize, model->coords, GL_STATIC_DRAW);
-
-    /*  - location of position vertex attrib
-     *  - size of vertex attrib (vec3)
-     *  - data type
-     *  - normalized? no
-     *  - stride
-     *  - data offset in the buffer
-     */
-
-    /* vertices */
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-            6 * sizeof (GLfloat), (GLvoid *) 0);
-
-    /* place data on shader location 0 */
-    glEnableVertexAttribArray(0);
-
-    /* normals */
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-            6 * sizeof (GLfloat), (GLvoid *) (3 * sizeof (GLfloat)));
-    glEnableVertexAttribArray(1);
-
-    /* unbind vao */
-    glBindVertexArray(0);
-
     struct pad *p = malloc(sizeof *p);
-    p->vao = vao;
-    p->vbo = vbo;
+
     p->x = 0.0;
     p->speed = 0.0;
-    p->vertex_count = model->nvertex;
     p->angle = -90.0;
+    p->mesh = pad_mesh();
 
     return p;
 }
@@ -94,10 +74,8 @@ pad_new(void)
 void
 pad_free(struct pad *p)
 {
-    glDeleteVertexArrays(1, &p->vao);
-    glDeleteBuffers(1, &p->vbo);
-
     free(p);
+    pad_mesh_free();
 }
 
 void
@@ -119,8 +97,8 @@ pad_draw(void *object, GLuint shader_program)
     shader_set_uniform_m4(shader_program, "model", model_matrix);
     shader_set_uniform_m4(shader_program, "normalModel", normal_matrix);
 
-    glBindVertexArray(pad->vao);
-    glDrawArrays(GL_TRIANGLES, 0, pad->vertex_count);
+    glBindVertexArray(pad->mesh->vao);
+    glDrawArrays(GL_TRIANGLES, 0, pad->mesh->vertex_count);
     glBindVertexArray(0);
 }
 

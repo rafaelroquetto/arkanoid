@@ -3,15 +3,15 @@
 
 #include <GL/gl.h>
 
+struct mesh;
+
 struct pad
 {
     GLfloat x;
     GLfloat speed;
     GLint angle;
 
-    GLuint vao;
-    GLuint vbo;
-    GLsizei vertex_count;
+    struct mesh *mesh;
 };
 
 struct pad * pad_new(void);
