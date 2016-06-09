@@ -2,8 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <unistd.h>
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "shader.h"
@@ -87,6 +88,11 @@ init_glfw(void)
 
     window = create_window();
 
+    glewExperimental = GL_TRUE;
+
+    if (glewInit() != GLEW_OK)
+        panic("Cannot initialize GLEW");
+
     glEnable(GL_DEPTH_TEST);
 }
 
@@ -100,7 +106,7 @@ struct update_ctx
 
 static struct update_ctx update_contexts[] = {
     { pad_update, (void **) &pad },
-    NULL
+    { NULL }
 };
 
 static void
@@ -133,7 +139,7 @@ struct draw_ctx
 
 static struct draw_ctx draw_contexts[] = {
     { pad_draw, (void **) &pad },
-    NULL
+    { NULL }
 };
 
 static void

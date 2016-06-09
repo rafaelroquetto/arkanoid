@@ -1,4 +1,6 @@
-#include <GL/gl.h>
+#define _GNU_SOURCE /* for strchrnul */
+
+#include <GL/glew.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -47,7 +49,7 @@ load_file(const char *path)
     if ((fd = open(path, O_RDONLY)) == -1)
         panic("Cannot load model '%s': %s", path, strerror(errno));
 
-    while(nbytes = read(fd, buf, sizeof buf))
+    while ((nbytes = read(fd, buf, sizeof buf)))
         byte_array_append(b, buf, nbytes);
 
     close(fd);
@@ -182,7 +184,6 @@ parse_face_component(struct byte_array *faces)
 {
     char *token;
 
-    GLuint coord;
     GLuint ivertex;
     GLuint itexture;
     GLuint inormal;
@@ -289,8 +290,6 @@ static void
 setup_model(struct model *m, struct byte_array *vertices,
         struct byte_array *normals, struct byte_array *indices)
 {
-    size_t vcount;
-    size_t ncount;
     size_t icount;
     size_t buffer_size;
     int i;
@@ -302,8 +301,8 @@ setup_model(struct model *m, struct byte_array *vertices,
     GLuint *index_data;
     GLfloat *buffer;
 
-    vcount = byte_array_to_float_array(vertices, &vertex_data);
-    ncount = byte_array_to_float_array(normals, &normal_data);
+    byte_array_to_float_array(vertices, &vertex_data);
+    byte_array_to_float_array(normals, &normal_data);
     icount = byte_array_to_int_array(indices, &index_data);
 
     /* icount holds the total number of components of each index

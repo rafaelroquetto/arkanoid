@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-g -I.
-LFLAGS=-lGL -lglfw -lm
+CFLAGS=-Wall -Werror -g -I.
+LFLAGS=-lGLEW -lGL -lglfw -lm
 TARGET=main
 
 sources = $(wildcard *.c)
