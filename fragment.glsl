@@ -2,8 +2,11 @@
 
 in vec3 Normal;
 in vec3 FragPos;
+in vec4 gl_FragCoord;
 
 out vec4 color;
+
+uniform int objectType;
 
 void main()
 {
@@ -11,7 +14,7 @@ void main()
 
     // ambient light
     float ambientStrength = 0.2f;
-    vec3 objectColor = vec3(1.0f, 0.5f, 0.2f);
+    vec3 objectColor = (objectType == 0) ? vec3(1.0f, 0.5f, 0.2f) : vec3(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.z);//vec3(0.6, 0.9, 0.2);
     vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
     vec3 ambient = ambientStrength * lightColor;
 

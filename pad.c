@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "model.h"
 #include "mesh.h"
+#include "objects.h"
 
 static const GLfloat PAD_THROTTLE = 0.8f;
 static const GLfloat MAX_SPEED = 2.0f;
@@ -96,6 +97,7 @@ pad_draw(void *object, GLuint shader_program)
 
     shader_set_uniform_m4(shader_program, "model", model_matrix);
     shader_set_uniform_m4(shader_program, "normalModel", normal_matrix);
+    shader_set_uniform_i(shader_program, "objectType", OBJECT_PAD);
 
     glBindVertexArray(pad->mesh->vao);
     glDrawArrays(GL_TRIANGLES, 0, pad->mesh->vertex_count);
