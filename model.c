@@ -325,6 +325,10 @@ setup_model(struct model *m, struct byte_array *vertices,
         buffer[current_coord++] = normal_coord(normal_data, index_data, COORD_Z, i);
     }
 
+    free(vertex_data);
+    free(normal_data);
+    free(index_data);
+
     m->coords = buffer;
     m->csize = buffer_size;
     m->nvertex = nvertex;

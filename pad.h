@@ -11,7 +11,6 @@ struct pad
 
     GLuint vao;
     GLuint vbo;
-    GLuint ebo;
     GLsizei vertex_count;
 };
 

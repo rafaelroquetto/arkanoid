@@ -95,7 +95,6 @@ pad_free(struct pad *p)
 {
     glDeleteVertexArrays(1, &p->vao);
     glDeleteBuffers(1, &p->vbo);
-    glDeleteBuffers(1, &p->ebo);
 
     free(p);
 }
