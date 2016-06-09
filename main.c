@@ -149,7 +149,7 @@ setup_uniforms(GLuint shader_program)
 
     /* view matrix */
     mat4x4 view_matrix;
-    mat4x4_translate(view_matrix, 0.0, -6.5, -40.0);
+    mat4x4_translate(view_matrix, 0.0, -15.0, -40.0);
 
     shader_set_uniform_m4(shader_program, "view", view_matrix);
 

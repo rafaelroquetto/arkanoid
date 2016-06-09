@@ -7,9 +7,10 @@
 #include "shader.h"
 #include "model.h"
 
-static const GLfloat PAD_THROTTLE = 0.3f;
-static const GLfloat MAX_SPEED = 0.9f;
-static const GLfloat PAD_FRICTION = 0.04f;
+static const GLfloat PAD_THROTTLE = 0.8f;
+static const GLfloat MAX_SPEED = 2.0f;
+static const GLfloat PAD_FRICTION = 0.1f;
+static const GLfloat SCALE_FACTOR = 0.4;
 
 static inline
 float deg_to_rad(float deg)
@@ -85,7 +86,7 @@ pad_new(void)
     p->x = 0.0;
     p->speed = 0.0;
     p->vertex_count = model->nvertex;
-    p->angle = 0.0;
+    p->angle = -90.0;
 
     return p;
 }
@@ -105,9 +106,11 @@ pad_draw(void *object, GLuint shader_program)
     struct pad *pad = (struct pad *) object;
 
     mat4x4 model_matrix;
-    mat4x4_translate(model_matrix, pad->x, 0.0, 0.0);
+    mat4x4_identity(model_matrix);
+    mat4x4_scale_aniso(model_matrix, model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
     mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(pad->angle));
     mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
+    mat4x4_translate_in_place(model_matrix, 0.0, 0.0, -pad->x);
 
     mat4x4 normal_matrix;
     mat4x4_invert(normal_matrix, model_matrix);
