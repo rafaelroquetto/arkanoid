@@ -57,70 +57,32 @@ load_file(const char *path)
     return b;
 }
 
-static int
-byte_array_lines(struct byte_array *b)
-{
-    int nlines;
-    char *ptr;
-
-    nlines = 0;
-
-    ptr = b->data;
-
-    if (*ptr == 0)
-        return 0;
-
-    while (*ptr) {
-        if (*ptr == '\n')
-            ++nlines;
-        ++ptr;
-    }
-
-    return nlines;
-}
-
 static char *
-byte_array_line(struct byte_array *b, int index)
+byte_array_get_next_line(struct byte_array *b)
 {
-    char *ptr;
-    char *begin;
-    char *line;
-    int count;
-    int line_len;
+    static char *ptr = NULL;
 
-    /* files start at line 1, but index is 0-based */
-    ++index;
+    if (b != NULL)
+        ptr = b->data;
 
-    begin = ptr = b->data;
+    char *newline;
+    char *ret;
 
-    if (*ptr == 0)
+    if (*ptr == '\0')
         return NULL;
 
-    count = 0;
-    line_len = 0;
+    newline = strchrnul(ptr, '\n');
 
-    while (*ptr) {
-        ++line_len;
+    *newline = '\0';
 
-        if (*ptr == '\n') {
-            ++count;
+    ret = ptr;
 
-            if (count == index) {
-                break;
-            } else {
-                begin = ptr + 1;
-                line_len = 0;
-            }
-        }
+    if (newline == '\0')
+        ptr = newline;
+    else
+        ptr = newline + 1;
 
-        ++ptr;
-    }
-
-    line = (char *) malloc(line_len);
-    memcpy(line, begin, line_len);
-    line[line_len - 1] = '\0';
-
-    return line;
+    return ret;
 }
 
 static void
@@ -343,8 +305,7 @@ load_model(const char *path)
     struct byte_array *normals;
     struct byte_array *faces;
 
-    int lines;
-    int i;
+    char *line;
 
     vertices = byte_array_new(1024);
     normals = byte_array_new(1024);
@@ -352,14 +313,11 @@ load_model(const char *path)
 
     file = load_file(path);
 
-    lines = byte_array_lines(file);
+    line = byte_array_get_next_line(file);
 
-    for (i = 0; i < lines; ++ i) {
-        char *line = byte_array_line(file, i);
+    while (line) {
         parse_line(line, vertices, normals, faces);
-
-        /*FIXME use a static buffer instead, allocs are expensive*/
-        free(line);
+        line = byte_array_get_next_line(NULL);
     }
 
     byte_array_free(file);
