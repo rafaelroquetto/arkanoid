@@ -8,13 +8,9 @@
 #include "model.h"
 #include "mesh.h"
 #include "objects.h"
+#include "utils.h"
 
 static const float SCALE_FACTOR = 0.2;
-static inline
-float deg_to_rad(float deg)
-{
-    return M_PI*deg/180.f;
-}
 
 static int mesh_ref_count = 0;
 static struct mesh *mesh = NULL;

@@ -15,20 +15,6 @@ static const GLfloat MAX_SPEED = 2.0f;
 static const GLfloat PAD_FRICTION = 0.1f;
 static const GLfloat SCALE_FACTOR = 0.4;
 
-static inline
-float deg_to_rad(float deg)
-{
-    return M_PI*deg/180.f;
-}
-
-static int
-fuzzy_compare(double a, double b)
-{
-    static const double EPSILON = 0.00001;
-
-    return fabs(a - b) < EPSILON;
-}
-
 static int mesh_ref_count = 0;
 static struct mesh *mesh = NULL;
 

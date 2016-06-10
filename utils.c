@@ -2,6 +2,20 @@
 
 #include "utils.h"
 
+float
+deg_to_rad(float deg)
+{
+    return M_PI*deg/180.f;
+}
+
+int
+fuzzy_compare(double a, double b)
+{
+    static const double EPSILON = 0.00001;
+
+    return fabs(a - b) < EPSILON;
+}
+
 void
 dump_matrix4(mat4x4 m, const char *message)
 {
