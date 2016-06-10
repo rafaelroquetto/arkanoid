@@ -13,13 +13,13 @@
 #include "constants.h"
 #include "linmath.h"
 
-#include "brick.h"
+#include "level.h"
 
 static GLFWwindow *window = NULL;
 
 static struct pad *pad = NULL;
 
-static struct brick *brick = NULL;
+static struct level *level = NULL;
 
 /* "joypad" state */
 enum {
@@ -110,7 +110,7 @@ struct update_ctx
 
 static struct update_ctx update_contexts[] = {
     { pad_update, (void **) &pad },
-    { brick_update, (void **) &brick },
+    { level_update, (void **) &level },
     { NULL }
 };
 
@@ -144,7 +144,7 @@ struct draw_ctx
 
 static struct draw_ctx draw_contexts[] = {
     { pad_draw, (void **) &pad },
-    { brick_draw, (void **) &brick },
+    { level_draw, (void **) &level },
     { NULL }
 };
 
@@ -189,7 +189,7 @@ init_objects(void)
 
     pad = pad_new();
 
-    brick = brick_new();
+    level = level_new();
 }
 
 static void
@@ -199,7 +199,7 @@ free_objects(void)
 
     pad_free(pad);
 
-    brick_free(brick);
+    level_free(level);
 }
 
 static void

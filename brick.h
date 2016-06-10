@@ -9,6 +9,7 @@ struct brick
 {
     GLfloat x;
     GLfloat y;
+    GLfloat z;
 
     struct mesh *mesh;
 };

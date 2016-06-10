@@ -52,8 +52,7 @@ brick_new(void)
 {
     struct brick *b = malloc(sizeof *b);
 
-    b->x = -50.0;
-    b->y = 110.0;
+    b->x = b->y = b->z = 0.0;
     b->mesh = brick_mesh();
 
     return b;
@@ -74,11 +73,7 @@ brick_draw(void *object, GLuint shader_program)
     mat4x4 model_matrix;
     mat4x4_identity(model_matrix);
     mat4x4_scale_aniso(model_matrix, model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
-#if 0
-    mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(brick->angle));
-    mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
-#endif
-    mat4x4_translate_in_place(model_matrix, brick->x, brick->y, 1.0);
+    mat4x4_translate_in_place(model_matrix, brick->x, brick->y, brick->z);
 
     mat4x4 normal_matrix;
     mat4x4_invert(normal_matrix, model_matrix);
