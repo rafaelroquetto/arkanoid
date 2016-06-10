@@ -8,6 +8,7 @@
 #include "model.h"
 #include "mesh.h"
 #include "objects.h"
+#include "utils.h"
 
 static const GLfloat PAD_THROTTLE = 0.8f;
 static const GLfloat MAX_SPEED = 2.0f;
@@ -86,10 +87,10 @@ pad_draw(void *object, GLuint shader_program)
 
     mat4x4 model_matrix;
     mat4x4_identity(model_matrix);
-    mat4x4_scale_aniso(model_matrix, model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
     mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(pad->angle));
     mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
     mat4x4_translate_in_place(model_matrix, 0.0, 0.0, -pad->x);
+    mat4x4_scale_aniso(model_matrix, model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
 
     mat4x4 normal_matrix;
     mat4x4_invert(normal_matrix, model_matrix);

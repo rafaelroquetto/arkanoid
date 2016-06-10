@@ -14,7 +14,21 @@ void main()
 
     // ambient light
     float ambientStrength = 0.2f;
-    vec3 objectColor = (objectType == 0) ? vec3(1.0f, 0.5f, 0.2f) : vec3(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y);//vec3(0.6, 0.9, 0.2);
+
+    vec3 objectColor;
+
+    switch (objectType) {
+    case 0: // pad
+        objectColor = vec3(1.0f, 0.5f, 0.2f);
+        break;
+    case 1: // brick
+        objectColor = vec3(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y);
+        break;
+    case 2: // ball
+        objectColor = vec3(0.5f, 0.5f, 0.4f);
+        break;
+    }
+
     vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
     vec3 ambient = ambientStrength * lightColor;
 

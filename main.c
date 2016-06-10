@@ -12,14 +12,16 @@
 #include "panic.h"
 #include "constants.h"
 #include "linmath.h"
-
 #include "level.h"
+#include "ball.h"
 
 static GLFWwindow *window = NULL;
 
 static struct pad *pad = NULL;
 
 static struct level *level = NULL;
+
+static struct ball *ball = NULL;
 
 /* "joypad" state */
 enum {
@@ -111,6 +113,7 @@ struct update_ctx
 static struct update_ctx update_contexts[] = {
     { pad_update, (void **) &pad },
     { level_update, (void **) &level },
+    { ball_update, (void **) &ball },
     { NULL }
 };
 
@@ -125,6 +128,10 @@ update(void)
         pad_throttle_right(pad);
     if (pad_state & PAD_UP)
         pad_rotate_x(pad);
+
+    ball->x = pad->x;
+    ball->y = 0.55;
+    ball->z = 0.0;
 
     ctx = update_contexts;
 
@@ -145,6 +152,7 @@ struct draw_ctx
 static struct draw_ctx draw_contexts[] = {
     { pad_draw, (void **) &pad },
     { level_draw, (void **) &level },
+    { ball_draw, (void **) &ball },
     { NULL }
 };
 
@@ -162,7 +170,6 @@ setup_uniforms(GLuint shader_program)
     /* projection matrix */
     mat4x4 projection_matrix;
     mat4x4_perspective(projection_matrix, M_PI/4, VIEWPORT_WIDTH/VIEWPORT_HEIGHT, 0.1f, 100.f);
-    //mat4x4_ortho(projection_matrix, 0.0, 800.0, 0.0, 600.0, 0.1, 100.0);
 
     shader_set_uniform_m4(shader_program, "projection", projection_matrix);
 }
@@ -190,6 +197,8 @@ init_objects(void)
     pad = pad_new();
 
     level = level_new();
+
+    ball = ball_new();
 }
 
 static void
@@ -200,6 +209,8 @@ free_objects(void)
     pad_free(pad);
 
     level_free(level);
+
+    ball_free(ball);
 }
 
 static void
