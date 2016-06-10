@@ -3,8 +3,6 @@
 
 #include <GL/gl.h>
 
-struct byte_array;
-
 enum {
     LEVEL_COLUMNS = 20,
     LEVEL_ROWS = 20
@@ -17,7 +15,7 @@ struct level
 
     int map[LEVEL_ROWS][LEVEL_COLUMNS];
 
-    struct byte_array *bricks;
+    struct list *bricks;
 };
 
 struct level * level_new(void);

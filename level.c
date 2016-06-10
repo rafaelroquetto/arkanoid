@@ -2,40 +2,38 @@
 #include <GL/glew.h>
 
 #include "level.h"
-#include "linmath.h"
 #include "constants.h"
-#include "shader.h"
-#include "bytearray.h"
+#include "list.h"
 #include "brick.h"
-#include "objects.h"
+
+static const float H_DISTANCE = 6.0;
+static const float V_DISTANCE = 4.0;
+static const float DEPTH = 4.0;
+static const float X_ORIG = -60.0;
+static const float Y_ORIG = 60.0;
 
 struct level *
 level_new(void)
 {
     int i;
     int j;
+
     struct brick *b;
+    struct level *l;
 
-    struct level *l = malloc(sizeof *l);
+    l = malloc(sizeof *l);
+    l->bricks = list_new();
 
-    float init_x = -60.0;
-    float init_y = 60.0;
-
-    //l->map = { 1 };
-
-    l->bricks = byte_array_new(LEVEL_ROWS * LEVEL_COLUMNS * sizeof (*b));
 
     for (i = 0; i < LEVEL_ROWS; ++i) {
         for (j = 0; j < LEVEL_COLUMNS; ++j) {
             b = brick_new();
-            b->x = init_x + j * 6.0;
-            b->y = init_y + i * 4.0;
-            b->z = 5.0;
-            /* FIXME use a linked list to avoid 
-             * unecessary allocs
-             */
-            byte_array_append(l->bricks, (const char *) b, sizeof *b);
-            /* FIXME memory leak: cannot free brick or mesh will be freed */
+
+            b->x = X_ORIG + j * H_DISTANCE;
+            b->y = Y_ORIG + i * V_DISTANCE;
+            b->z = DEPTH;
+
+            list_add(l->bricks, (void *) b);
         }
     }
 
@@ -45,23 +43,20 @@ level_new(void)
 void
 level_free(struct level *l)
 {
-    byte_array_free(l->bricks);
+    list_free(l->bricks, (list_free_func) brick_free);
     free(l);
 }
 
 void
 level_draw(void *object, GLuint shader_program)
 {
-    int i;
-    struct level *level = (struct level *) object;
-    struct brick *brick;
+    struct level *level;
+    struct node *n;
 
-    brick = (struct brick *) byte_array_data(level->bricks);
+    level = (struct level *) object;
 
-    for (i = 0; i < LEVEL_ROWS * LEVEL_COLUMNS; ++i) {
-            brick_draw(brick, shader_program);
-            ++brick;
-    }
+    for (n = level->bricks->first; n; n = n->next)
+            brick_draw((struct brick *) n->data, shader_program);
 }
 
 void
