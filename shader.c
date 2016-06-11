@@ -129,3 +129,11 @@ shader_set_uniform_i(GLuint shader_program, const char *uniform, GLint i)
     GLint location = glGetUniformLocation(shader_program, uniform);
     glUniform1i(location, i);
 }
+
+void
+shader_set_uniform_3f(GLuint shader_program, const char *uniform,
+        GLfloat x, GLfloat y, GLfloat z)
+{
+    GLint location = glGetUniformLocation(shader_program, uniform);
+    glUniform3f(location, x, y, z);
+}

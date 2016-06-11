@@ -210,6 +210,7 @@ check_ball_brick_collision(struct ball *b, struct level *l)
             continue;
 
         if (bb_intersects(&b->box, &brick->box)) {
+            printf("Intersects!\n");
             ball_set_direction(ball, -b->angle);
             brick_set_alive(brick, GL_FALSE);
             break;
@@ -281,6 +282,7 @@ setup_uniforms(GLuint shader_program)
     mat4x4_perspective(projection_matrix, M_PI/4, VIEWPORT_WIDTH/VIEWPORT_HEIGHT, 0.1f, 100.f);
 
     shader_set_uniform_m4(shader_program, "projection", projection_matrix);
+    shader_set_uniform_3f(shader_program, "viewPos", camera.x, camera.y, camera.z);
 }
 
 static void

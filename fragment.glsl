@@ -8,7 +8,7 @@ in vec2 TexCoord;
 out vec4 color;
 
 uniform int objectType;
-
+uniform vec3 viewPos;
 uniform sampler2D padTexture;
 
 void main()
@@ -43,8 +43,15 @@ void main()
     float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
 
+    //specular light
+    float specularStrength = 0.5f;
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+    vec3 specular = specularStrength * spec * lightColor;
 
-    vec4 result = vec4((ambient + diffuse), 1.0) * objectColor;
+
+    vec4 result = vec4((ambient + diffuse + specular), 1.0) * objectColor;
     //color = vec4(result, 1.0f);
     color = result;
 }

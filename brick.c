@@ -70,6 +70,7 @@ brick_draw(void *object, GLuint shader_program)
     shader_set_uniform_m4(shader_program, "model", brick->model_matrix);
     shader_set_uniform_m4(shader_program, "normalModel", brick->normal_matrix);
     shader_set_uniform_i(shader_program, "objectType", OBJECT_BRICK);
+    shader_set_uniform_i(shader_program, "explosionFactor", 1000);
 
     glBindVertexArray(brick->mesh->vao);
     glDrawArrays(GL_TRIANGLES, 0, brick->mesh->vertex_count);
