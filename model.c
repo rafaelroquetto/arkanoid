@@ -15,6 +15,7 @@
 #include "linmath.h"
 
 #include "model.h"
+#include "constants.h"
 
 
 static struct model *
@@ -211,20 +212,6 @@ byte_array_to_int_array(struct byte_array *b, GLuint **int_array)
 
     return b->size / sizeof (GLuint);
 }
-
-enum Coords {
-    COORD_X = 0,
-    COORD_Y = 1,
-    COORD_Z = 2
-};
-
-enum {
-    COORD_STRIDE = 3,
-    INDEX_STRIDE = 3,
-    VERTEX_OFFSET = 0,
-    TEXTURE_OFFSET = 1,
-    NORMAL_OFFSET = 2
-};
 
 static GLfloat
 vertex_coord(const GLfloat *vertex_data, const GLuint *index_data,

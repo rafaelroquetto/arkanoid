@@ -1,11 +1,53 @@
 #include <stdlib.h>
 #include <GL/glew.h>
+#include <stdio.h>
 
 #include "mesh.h"
 #include "linmath.h"
 #include "constants.h"
 #include "shader.h"
 #include "model.h"
+
+static void
+calculate_bounding_box(struct model *m, struct bounding_box *box)
+{
+    int i;
+    int ncoords;
+    vec3 *coord;
+
+    coord = (vec3 *) m->coords;
+
+    ncoords = m->csize / sizeof *coord;
+
+    box->min[COORD_X] = coord[0][COORD_X];
+    box->min[COORD_Y] = coord[0][COORD_Y];
+    box->min[COORD_Z] = coord[0][COORD_Z];
+
+    box->max[COORD_X] = coord[0][COORD_X];
+    box->max[COORD_Y] = coord[0][COORD_Y];
+    box->max[COORD_Z] = coord[0][COORD_Z];
+
+    /* i += 2 to skip normals */
+    for (i = 0; i < ncoords; i += 2) {
+        if (coord[i][COORD_X] < box->min[COORD_X])
+            box->min[COORD_X] = coord[i][COORD_X];
+
+        if (coord[i][COORD_Y] < box->min[COORD_Y])
+            box->min[COORD_Y] = coord[i][COORD_Y];
+
+        if (coord[i][COORD_Z] < box->min[COORD_Z])
+            box->min[COORD_Z] = coord[i][COORD_Z];
+
+        if (coord[i][COORD_X] > box->max[COORD_X])
+            box->max[COORD_X] = coord[i][COORD_X];
+
+        if (coord[i][COORD_Y] > box->max[COORD_Y])
+            box->max[COORD_Y] = coord[i][COORD_Y];
+
+        if (coord[i][COORD_Z] > box->max[COORD_Z])
+            box->max[COORD_Z] = coord[i][COORD_Z];
+    }
+}
 
 struct mesh *
 mesh_load(const char *path)
@@ -65,6 +107,8 @@ mesh_new(struct model *model)
     m->vao = vao;
     m->vbo = vbo;
     m->vertex_count = model->nvertex;
+
+    calculate_bounding_box(model, &m->bounding_box);
 
     return m;
 }

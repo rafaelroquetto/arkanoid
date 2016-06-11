@@ -3,6 +3,8 @@
 
 #include <GL/gl.h>
 
+#include "boundingbox.h"
+
 struct model;
 
 struct mesh
@@ -10,6 +12,8 @@ struct mesh
     GLuint vao;
     GLuint vbo;
     GLsizei vertex_count;
+
+    struct bounding_box bounding_box;
 };
 
 struct mesh * mesh_load(const char *path);

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <GL/glew.h>
 
 #include "pad.h"
@@ -71,19 +72,8 @@ pad_draw(void *object, GLuint shader_program)
 {
     struct pad *pad = (struct pad *) object;
 
-    mat4x4 model_matrix;
-    mat4x4_identity(model_matrix);
-    mat4x4_rotate_X(model_matrix, model_matrix, deg_to_rad(pad->angle));
-    mat4x4_rotate_Y(model_matrix, model_matrix, deg_to_rad(90.0));
-    mat4x4_translate_in_place(model_matrix, 0.0, 0.0, -pad->x);
-    mat4x4_scale_aniso(model_matrix, model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
-
-    mat4x4 normal_matrix;
-    mat4x4_invert(normal_matrix, model_matrix);
-    mat4x4_transpose(normal_matrix, normal_matrix);
-
-    shader_set_uniform_m4(shader_program, "model", model_matrix);
-    shader_set_uniform_m4(shader_program, "normalModel", normal_matrix);
+    shader_set_uniform_m4(shader_program, "model", pad->model_matrix);
+    shader_set_uniform_m4(shader_program, "normalModel", pad->normal_matrix);
     shader_set_uniform_i(shader_program, "objectType", OBJECT_PAD);
 
     glBindVertexArray(pad->mesh->vao);
@@ -107,6 +97,45 @@ pad_deaccel(struct pad *p)
         p->speed = 0.0f;
 }
 
+static void
+recalculate_matrices(struct pad *p)
+{
+    mat4x4_identity(p->model_matrix);
+    mat4x4_rotate_X(p->model_matrix, p->model_matrix, deg_to_rad(p->angle));
+    mat4x4_rotate_Y(p->model_matrix, p->model_matrix, deg_to_rad(90.0));
+    mat4x4_translate_in_place(p->model_matrix, 0.0, 0.0, -p->x);
+    mat4x4_scale_aniso(p->model_matrix, p->model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
+
+    mat4x4_invert(p->normal_matrix, p->model_matrix);
+    mat4x4_transpose(p->normal_matrix, p->normal_matrix);
+}
+
+static void
+mat4x4_mul_vec3(vec3 r, mat4x4 M, vec3 v)
+{
+    vec4 aux;
+
+    aux[COORD_X] = v[COORD_X];
+    aux[COORD_Y] = v[COORD_Y];
+    aux[COORD_Z] = v[COORD_Z];
+    aux[COORD_W] = 1.0f;
+
+    mat4x4_mul_vec4(aux, M, aux);
+
+    r[COORD_X] = aux[COORD_X];
+    r[COORD_Y] = aux[COORD_Y];
+    r[COORD_Z] = aux[COORD_Z];
+}
+
+static void
+update_bounding_box(struct pad *p)
+{
+    p->box = p->mesh->bounding_box;
+
+    mat4x4_mul_vec3(p->box.min, p->model_matrix, p->box.min);
+    mat4x4_mul_vec3(p->box.max, p->model_matrix, p->box.max);
+}
+
 void
 pad_update(void *object)
 {
@@ -115,6 +144,9 @@ pad_update(void *object)
     p->x += p->speed;
 
     pad_deaccel(p);
+
+    recalculate_matrices(p);
+    update_bounding_box(p);
 }
 
 void

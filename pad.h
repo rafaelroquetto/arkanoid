@@ -3,6 +3,9 @@
 
 #include <GL/gl.h>
 
+#include "linmath.h"
+#include "boundingbox.h"
+
 struct mesh;
 
 struct pad
@@ -12,6 +15,11 @@ struct pad
     GLint angle;
 
     struct mesh *mesh;
+
+    mat4x4 model_matrix;
+    mat4x4 normal_matrix;
+
+    struct bounding_box box;
 };
 
 struct pad * pad_new(void);
