@@ -50,6 +50,7 @@ brick_new(void)
 
     b->x = b->y = b->z = 0.0;
     b->mesh = brick_mesh();
+    b->alive = GL_TRUE;
 
     return b;
 }
@@ -106,3 +107,8 @@ brick_update(void *object)
     update_bounding_box(b);
 }
 
+void
+brick_set_alive(struct brick *b, GLboolean alive)
+{
+    b->alive = alive;
+}

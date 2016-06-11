@@ -17,6 +17,8 @@
 #include "ball.h"
 #include "utils.h"
 #include "boundingbox.h"
+#include "list.h"
+#include "brick.h"
 
 static GLFWwindow *window = NULL;
 
@@ -165,6 +167,8 @@ init_glfw(void)
         panic("Cannot initialize GLEW");
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 typedef void (*update_func)(void *object);
@@ -196,6 +200,21 @@ check_ball_pad_collision(struct ball *b, struct pad *p)
 static void
 check_ball_brick_collision(struct ball *b, struct level *l)
 {
+    struct node *n;
+    struct brick *brick;
+
+    for (n = level->bricks->first; n; n = n->next) {
+        brick = (struct brick *) n->data;
+
+        if (!brick->alive)
+            continue;
+
+        if (bb_intersects(&b->box, &brick->box)) {
+            ball_set_direction(ball, -b->angle);
+            brick_set_alive(brick, GL_FALSE);
+            break;
+        }
+    }
 }
 
 static void

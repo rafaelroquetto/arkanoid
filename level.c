@@ -50,11 +50,18 @@ level_draw(void *object, GLuint shader_program)
 {
     struct level *level;
     struct node *n;
+    struct brick *brick;
 
     level = (struct level *) object;
 
-    for (n = level->bricks->first; n; n = n->next)
-            brick_draw((struct brick *) n->data, shader_program);
+    for (n = level->bricks->first; n; n = n->next) {
+       brick = (struct brick *) n->data;
+
+       if (!brick->alive)
+           continue;
+
+       brick_draw((struct brick *) n->data, shader_program);
+    }
 }
 
 void

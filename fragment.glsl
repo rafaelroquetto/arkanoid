@@ -27,7 +27,7 @@ void main()
         objectColor = texture(padTexture, TexCoord);
         break;
     case 1: // brick
-        objectColor = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, gl_FragCoord.x/1024);
+        objectColor = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, 1.0);
         break;
     case 2: // ball
         objectColor = vec4(0.5f, 0.5f, 0.4f, 1.0);
