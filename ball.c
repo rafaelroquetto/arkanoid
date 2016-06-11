@@ -49,8 +49,10 @@ ball_new(void)
 {
     struct ball *b = malloc(sizeof *b);
 
-    b->x = b->y = b->z = 0.0;
+    b->speed = b->x = b->y = b->z = 0.0;
     b->mesh = ball_mesh();
+
+    ball_set_direction(b, 120.0);
 
     return b;
 }
@@ -100,9 +102,54 @@ update_bounding_box(struct ball *b)
 void
 ball_update(void *object)
 {
+    int signal;
+
     struct ball *b = (struct ball *) object;
+
+    b->x += b->direction[COORD_X];
+    b->y += b->direction[COORD_Y];
+
+    signal = (b->x) < 0.0 ? -1 : 1;
+
+    if (fabs(b->x) > WORLD_BOUNDARY_X) {
+        ball_set_direction(b, 180 - b->angle);
+        b->x = signal * WORLD_BOUNDARY_X;
+    }
+
+    if (b->y > WORLD_BOUNDARY_Y) {
+        ball_set_direction(b, -b->angle);
+        b->y = WORLD_BOUNDARY_Y;
+    }
 
     recalculate_matrices(b);
     update_bounding_box(b);
 }
 
+void
+ball_set_direction(struct ball *b, float angle)
+{
+    float rad;
+
+    rad = deg_to_rad(angle);
+
+    b->angle = angle;
+    b->direction[COORD_X] = cos(rad) * b->speed;
+    b->direction[COORD_Y] = sin(rad) * b->speed;
+}
+
+void
+ball_set_speed(struct ball *b, float speed)
+{
+    b->speed = speed;
+    ball_set_direction(b, b->angle);
+}
+
+void
+ball_reset_direction(struct ball *b)
+{
+    float angle;
+
+    angle = 45.0 + rand() % 90;
+
+    ball_set_direction(b, angle);
+}

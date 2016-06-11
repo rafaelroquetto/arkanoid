@@ -11,8 +11,8 @@
 #include "objects.h"
 #include "utils.h"
 
-static const GLfloat PAD_THROTTLE = 0.8f;
-static const GLfloat MAX_SPEED = 2.0f;
+static const GLfloat PAD_THROTTLE = 0.6f;
+static const GLfloat MAX_SPEED = 1.7f;
 static const GLfloat PAD_FRICTION = 0.1f;
 static const GLfloat SCALE_FACTOR = 0.4;
 
@@ -93,8 +93,11 @@ pad_deaccel(struct pad *p)
 
     p->speed -= signal*PAD_FRICTION;
 
-    if (fabs(p->speed) <= 0.0f)
+    if (fabs(p->speed) <= 0.1f) {
         p->speed = 0.0f;
+        return;
+    }
+
 }
 
 static void
@@ -122,9 +125,18 @@ update_bounding_box(struct pad *p)
 void
 pad_update(void *object)
 {
+    int signal;
+
     struct pad *p = (struct pad *) object;
 
     p->x += p->speed;
+
+    signal = (p->speed > 0) ? 1 : -1;
+
+    if (fabs(p->x) > WORLD_BOUNDARY_X) {
+        p->x = signal * WORLD_BOUNDARY_X;
+        p->speed = -p->speed * 1.5;
+    }
 
     pad_deaccel(p);
 

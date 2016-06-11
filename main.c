@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
+#include <time.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -33,14 +34,42 @@ enum {
     PAD_PULSE = 32
 };
 
+enum state {
+    RESET,
+    RUNNING
+};
+
 static unsigned pad_state;
+
+static unsigned game_state;
+
+static void
+reset_game(void)
+{
+    game_state = RESET;
+
+    ball_set_speed(ball, 0.0);
+    ball_reset_direction(ball);
+
+    pad->x = 0.0;
+    ball->x = pad->x;
+    ball->y = 0.55;
+    ball->z = 0.0;
+}
+
+static void
+start_game(void)
+{
+    game_state = RUNNING;
+    ball_set_speed(ball, 0.2);
+}
 
 static void
 handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
 {
     switch (action) {
     case GLFW_PRESS:
-    case GLFW_RESIZABLE:
+    case GLFW_REPEAT:
         if (key == GLFW_KEY_ESCAPE) {
             glfwSetWindowShouldClose(window, GL_TRUE);
         } else if (key == GLFW_KEY_LEFT) {
@@ -49,6 +78,11 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
             pad_state |= PAD_RIGHT;
         } else if (key == GLFW_KEY_UP) {
             pad_state |= PAD_UP;
+        } else if (key == GLFW_KEY_SPACE) {
+            if (game_state == RUNNING)
+                reset_game();
+            else
+                start_game();
         }
 
         break;
@@ -129,9 +163,8 @@ update(void)
     if (pad_state & PAD_UP)
         pad_rotate_x(pad);
 
-    ball->x = pad->x;
-    ball->y = 0.55;
-    ball->z = 0.0;
+    if (game_state == RESET)
+        ball->x = pad->x;
 
     ctx = update_contexts;
 
@@ -246,9 +279,13 @@ handle_events(void)
 
 int main(int argc, char *argv[])
 {
+    srand(time(NULL));
+
     init_glfw();
 
     init_objects();
+
+    reset_game();
 
     handle_events();
 

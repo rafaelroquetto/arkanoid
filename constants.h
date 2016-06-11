@@ -23,5 +23,7 @@ enum offsets {
     NORMAL_OFFSET = 2
 };
 
+static const float WORLD_BOUNDARY_X = 16.5;
+static const float WORLD_BOUNDARY_Y = 31.5;
 
 #endif /* CONSTANTS_H */
