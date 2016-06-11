@@ -15,6 +15,8 @@
 #include "linmath.h"
 #include "level.h"
 #include "ball.h"
+#include "utils.h"
+#include "boundingbox.h"
 
 static GLFWwindow *window = NULL;
 
@@ -43,6 +45,16 @@ static unsigned pad_state;
 
 static unsigned game_state;
 
+struct camera
+{
+    GLfloat x;
+    GLfloat y;
+    GLfloat z;
+    GLfloat angle;
+};
+
+static struct camera camera;
+
 static void
 reset_game(void)
 {
@@ -53,8 +65,13 @@ reset_game(void)
 
     pad->x = 0.0;
     ball->x = pad->x;
-    ball->y = 0.55;
+    ball->y = 0.6;
     ball->z = 0.0;
+
+    camera.x = 0.0;
+    camera.y = -15.0;
+    camera.z = -40.0;
+    camera.angle = 0.0;
 }
 
 static void
@@ -83,6 +100,20 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
                 reset_game();
             else
                 start_game();
+        } else if (key == GLFW_KEY_W) {
+            camera.z += 0.5;
+        } else if (key == GLFW_KEY_S) {
+            camera.z -= 0.5;
+        } else if (key == GLFW_KEY_A) {
+            camera.x += 0.5;
+        } else if (key == GLFW_KEY_D) {
+            camera.x -= 0.5;
+        } else if (key == GLFW_KEY_Q) {
+            camera.y += 0.5;
+        } else if (key == GLFW_KEY_E) {
+            camera.y -= 0.5;
+        } else if (key == GLFW_KEY_R) {
+            camera.angle += 5.0;
         }
 
         break;
@@ -152,6 +183,29 @@ static struct update_ctx update_contexts[] = {
 };
 
 static void
+check_ball_pad_collision(struct ball *b, struct pad *p)
+{
+    if (game_state == RESET)
+        return;
+
+    if (bb_intersects(&b->box, &p->box)) {
+        ball_set_direction(ball, -b->angle);
+    }
+}
+
+static void
+check_ball_brick_collision(struct ball *b, struct level *l)
+{
+}
+
+static void
+check_collisions()
+{
+    check_ball_pad_collision(ball, pad);
+    check_ball_brick_collision(ball, level);
+}
+
+static void
 update(void)
 {
     struct update_ctx *ctx;
@@ -165,6 +219,8 @@ update(void)
 
     if (game_state == RESET)
         ball->x = pad->x;
+
+    check_collisions();
 
     ctx = update_contexts;
 
@@ -196,7 +252,8 @@ setup_uniforms(GLuint shader_program)
 
     /* view matrix */
     mat4x4 view_matrix;
-    mat4x4_translate(view_matrix, 0.0, -15.0, -40.0);
+    mat4x4_translate(view_matrix, camera.x, camera.y, camera.z);
+    mat4x4_rotate_Y(view_matrix, view_matrix, deg_to_rad(camera.angle));
 
     shader_set_uniform_m4(shader_program, "view", view_matrix);
 

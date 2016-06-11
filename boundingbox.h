@@ -9,4 +9,7 @@ struct bounding_box
     vec3 max;
 };
 
+int bb_intersects(struct bounding_box *a,
+        struct bounding_box *b);
+
 #endif /* BOUNDINGBOX_H */

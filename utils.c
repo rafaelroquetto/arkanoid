@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "utils.h"
+#include "boundingbox.h"
 
 float
 deg_to_rad(float deg)
@@ -36,3 +37,11 @@ dump_matrix4(mat4x4 m, const char *message)
 
 }
 
+void
+dump_bounding_box(struct bounding_box *b, const char *message)
+{
+    printf("%s (%f, %f, %f, %f, %f, %f)\n", message,
+            b->min[COORD_X], b->min[COORD_Y], b->min[COORD_Z],
+            b->max[COORD_X], b->max[COORD_Y], b->max[COORD_Z]);
+
+}

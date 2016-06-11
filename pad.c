@@ -104,9 +104,7 @@ static void
 recalculate_matrices(struct pad *p)
 {
     mat4x4_identity(p->model_matrix);
-    mat4x4_rotate_X(p->model_matrix, p->model_matrix, deg_to_rad(p->angle));
-    mat4x4_rotate_Y(p->model_matrix, p->model_matrix, deg_to_rad(90.0));
-    mat4x4_translate_in_place(p->model_matrix, 0.0, 0.0, -p->x);
+    mat4x4_translate_in_place(p->model_matrix, p->x, 0.0, 0.0);
     mat4x4_scale_aniso(p->model_matrix, p->model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
 
     mat4x4_invert(p->normal_matrix, p->model_matrix);
@@ -116,10 +114,13 @@ recalculate_matrices(struct pad *p)
 static void
 update_bounding_box(struct pad *p)
 {
+    mat4x4 m;
+    mat4x4_identity(m);
+    mat4x4_translate_in_place(m, p->x, 0.0, 0.0);
     p->box = p->mesh->bounding_box;
 
-    mat4x4_mul_vec3(p->box.min, p->model_matrix, p->box.min);
-    mat4x4_mul_vec3(p->box.max, p->model_matrix, p->box.max);
+    mat4x4_mul_vec3(p->box.min, m, p->box.min);
+    mat4x4_mul_vec3(p->box.max, m, p->box.max);
 }
 
 void
