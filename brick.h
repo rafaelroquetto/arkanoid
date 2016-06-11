@@ -3,6 +3,9 @@
 
 #include <GL/gl.h>
 
+#include "linmath.h"
+#include "boundingbox.h"
+
 struct mesh;
 
 struct brick
@@ -12,6 +15,11 @@ struct brick
     GLfloat z;
 
     struct mesh *mesh;
+
+    mat4x4 model_matrix;
+    mat4x4 normal_matrix;
+
+    struct bounding_box box;
 };
 
 struct brick * brick_new(void);

@@ -60,9 +60,12 @@ level_draw(void *object, GLuint shader_program)
 void
 level_update(void *object)
 {
-    struct level *p = (struct level *) object;
-    (void )p;
+    struct level *level;
+    struct node *n;
 
-    /* FIXME */
+    level = (struct level *) object;
+
+    for (n = level->bricks->first; n; n = n->next)
+            brick_update((struct brick *) n->data);
 }
 

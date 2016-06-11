@@ -67,17 +67,8 @@ ball_draw(void *object, GLuint shader_program)
 {
     struct ball *ball = (struct ball *) object;
 
-    mat4x4 model_matrix;
-    mat4x4_identity(model_matrix);
-    mat4x4_translate_in_place(model_matrix, ball->x, ball->y, ball->z);
-    mat4x4_scale_aniso(model_matrix, model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
-
-    mat4x4 normal_matrix;
-    mat4x4_invert(normal_matrix, model_matrix);
-    mat4x4_transpose(normal_matrix, normal_matrix);
-
-    shader_set_uniform_m4(shader_program, "model", model_matrix);
-    shader_set_uniform_m4(shader_program, "normalModel", normal_matrix);
+    shader_set_uniform_m4(shader_program, "model", ball->model_matrix);
+    shader_set_uniform_m4(shader_program, "normalModel", ball->normal_matrix);
     shader_set_uniform_i(shader_program, "objectType", OBJECT_BALL);
 
     glBindVertexArray(ball->mesh->vao);
@@ -85,12 +76,33 @@ ball_draw(void *object, GLuint shader_program)
     glBindVertexArray(0);
 }
 
+static void
+recalculate_matrices(struct ball *b)
+{
+    mat4x4_identity(b->model_matrix);
+    mat4x4_translate_in_place(b->model_matrix, b->x, b->y, b->z);
+    mat4x4_scale_aniso(b->model_matrix, b->model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
+
+    mat4x4_invert(b->normal_matrix, b->model_matrix);
+    mat4x4_transpose(b->normal_matrix, b->normal_matrix);
+
+}
+
+static void
+update_bounding_box(struct ball *b)
+{
+    b->box = b->mesh->bounding_box;
+
+    mat4x4_mul_vec3(b->box.min, b->model_matrix, b->box.min);
+    mat4x4_mul_vec3(b->box.max, b->model_matrix, b->box.max);
+}
+
 void
 ball_update(void *object)
 {
-    struct ball *p = (struct ball *) object;
-    (void )p;
+    struct ball *b = (struct ball *) object;
 
-    /* FIXME */
+    recalculate_matrices(b);
+    update_bounding_box(b);
 }
 
