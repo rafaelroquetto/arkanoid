@@ -90,14 +90,15 @@ mesh_new(struct model *model)
 
     /* vertices */
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
-            6 * sizeof (GLfloat), (GLvoid *) 0);
+            8 * sizeof (GLfloat), (GLvoid *) 0);
 
     /* place data on shader location 0 */
     glEnableVertexAttribArray(0);
 
     /* normals */
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
-            6 * sizeof (GLfloat), (GLvoid *) (3 * sizeof (GLfloat)));
+            8 * sizeof (GLfloat), (GLvoid *) (3 * sizeof (GLfloat)));
+
     glEnableVertexAttribArray(1);
 
     /* unbind vao */

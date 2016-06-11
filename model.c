@@ -114,6 +114,18 @@ parse_vertex(struct byte_array *dest)
 }
 
 static void
+parse_texture_vertex(struct byte_array *dest)
+{
+    char *token;
+
+    token = strtok(NULL, " ");
+    byte_array_append_float(dest, (GLfloat) atof(token));
+
+    token = strtok(NULL, " ");
+    byte_array_append_float(dest, (GLfloat) atof(token));
+}
+
+static void
 face_to_indices(const char *face, GLuint *ivertex,
         GLuint *itexture, GLuint *inormal)
 {
@@ -168,7 +180,8 @@ parse_face(struct byte_array *faces)
 
 static void
 parse_line(char *line, struct byte_array *vertices,
-        struct byte_array *normals, struct byte_array *faces)
+        struct byte_array *normals, struct byte_array *textures,
+        struct byte_array *faces)
 {
     char *token;
 
@@ -187,6 +200,8 @@ parse_line(char *line, struct byte_array *vertices,
         parse_vertex(vertices);
     } else if (strcmp(token, "vn") == 0) {
         parse_vertex(normals);
+    } else if (strcmp(token, "vt") == 0) {
+        parse_texture_vertex(textures);
     } else if (strcmp(token, "f") == 0) {
         parse_face(faces);
     }
@@ -235,30 +250,45 @@ normal_coord(const GLfloat *normal_data, const GLuint *index_data,
     return normal_data[normal_offset];
 }
 
+static GLfloat
+texture_coord(const GLfloat *texture_data, const GLuint *index_data,
+        int coord, int vertex)
+{
+    const unsigned int offset = vertex * INDEX_STRIDE + TEXTURE_OFFSET;
+    const unsigned int texture_index = index_data[offset] - 1; /* 0-based indices */
+    const unsigned int texture_offset = texture_index * COORD_STRIDE + coord;
+
+    return texture_data[texture_offset];
+}
+
 static void
 setup_model(struct model *m, struct byte_array *vertices,
-        struct byte_array *normals, struct byte_array *indices)
+        struct byte_array *normals, struct byte_array *textures,
+        struct byte_array *indices)
 {
     size_t icount;
     size_t buffer_size;
+    size_t tex_size;
     int i;
     int nvertex;
     int current_coord;
 
     GLfloat *vertex_data;
     GLfloat *normal_data;
+    GLfloat *texture_data;
     GLuint *index_data;
     GLfloat *buffer;
 
     byte_array_to_float_array(vertices, &vertex_data);
     byte_array_to_float_array(normals, &normal_data);
+    tex_size = byte_array_to_float_array(textures, &texture_data);
     icount = byte_array_to_int_array(indices, &index_data);
 
     /* icount holds the total number of components of each index
      * i.e. icount = number of vertex * 3 (vertex index, texture index and
      * normal index).
      */
-    buffer_size = icount * 2 * sizeof (GLfloat);
+    buffer_size = icount * 3 * sizeof (GLfloat);
     nvertex = icount / 3;
 
     /* size of vertices + size of normals */
@@ -272,10 +302,19 @@ setup_model(struct model *m, struct byte_array *vertices,
         buffer[current_coord++] = normal_coord(normal_data, index_data, COORD_X, i);
         buffer[current_coord++] = normal_coord(normal_data, index_data, COORD_Y, i);
         buffer[current_coord++] = normal_coord(normal_data, index_data, COORD_Z, i);
+
+        if (tex_size > 0) {
+            buffer[current_coord++] = texture_coord(texture_data, index_data, COORD_X, i);
+            buffer[current_coord++] = texture_coord(texture_data, index_data, COORD_Y, i);
+        } else {
+            buffer[current_coord++] = 0.0;
+            buffer[current_coord++] = 0.0;
+        }
     }
 
     free(vertex_data);
     free(normal_data);
+    free(texture_data);
     free(index_data);
 
     m->coords = buffer;
@@ -290,12 +329,14 @@ load_model(const char *path)
     struct byte_array *file;
     struct byte_array *vertices;
     struct byte_array *normals;
+    struct byte_array *textures;
     struct byte_array *faces;
 
     char *line;
 
     vertices = byte_array_new(1024);
     normals = byte_array_new(1024);
+    textures = byte_array_new(1024);
     faces = byte_array_new(1024);
 
     file = load_file(path);
@@ -303,7 +344,7 @@ load_model(const char *path)
     line = byte_array_get_next_line(file);
 
     while (line) {
-        parse_line(line, vertices, normals, faces);
+        parse_line(line, vertices, normals, textures, faces);
         line = byte_array_get_next_line(NULL);
     }
 
@@ -311,10 +352,11 @@ load_model(const char *path)
 
     model = model_new();
 
-    setup_model(model, vertices, normals, faces);
+    setup_model(model, vertices, normals, textures, faces);
 
     byte_array_free(vertices);
     byte_array_free(normals);
+    byte_array_free(textures);
     byte_array_free(faces);
 
     return model;
