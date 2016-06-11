@@ -3,10 +3,13 @@
 in vec3 Normal;
 in vec3 FragPos;
 in vec4 gl_FragCoord;
+in vec2 TexCoord;
 
 out vec4 color;
 
 uniform int objectType;
+
+uniform sampler2D padTexture;
 
 void main()
 {
@@ -15,17 +18,19 @@ void main()
     // ambient light
     float ambientStrength = 0.2f;
 
-    vec3 objectColor;
+    vec4 objectColor;
 
     switch (objectType) {
     case 0: // pad
-        objectColor = vec3(1.0f, 0.5f, 0.2f);
+        //vec4 blendColor = vec4(1.0f, 1.0f, 1.0f, 1.0);
+        //objectColor = texture(padTexture, TexCoord) * blendColor;
+        objectColor = texture(padTexture, TexCoord);
         break;
     case 1: // brick
-        objectColor = vec3(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y);
+        objectColor = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, gl_FragCoord.x/1024);
         break;
     case 2: // ball
-        objectColor = vec3(0.5f, 0.5f, 0.4f);
+        objectColor = vec4(0.5f, 0.5f, 0.4f, 1.0);
         break;
     }
 
@@ -39,7 +44,8 @@ void main()
     vec3 diffuse = diff * lightColor;
 
 
-    vec3 result = (ambient + diffuse) * objectColor;
-    color = vec4(result, 1.0f);
+    vec4 result = vec4((ambient + diffuse), 1.0) * objectColor;
+    //color = vec4(result, 1.0f);
+    color = result;
 }
 

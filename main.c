@@ -113,7 +113,7 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
         } else if (key == GLFW_KEY_E) {
             camera.y -= 0.5;
         } else if (key == GLFW_KEY_R) {
-            camera.angle += 5.0;
+            camera.angle += 2.0;
         }
 
         break;
@@ -253,7 +253,7 @@ setup_uniforms(GLuint shader_program)
     /* view matrix */
     mat4x4 view_matrix;
     mat4x4_translate(view_matrix, camera.x, camera.y, camera.z);
-    mat4x4_rotate_Y(view_matrix, view_matrix, deg_to_rad(camera.angle));
+    mat4x4_rotate_X(view_matrix, view_matrix, deg_to_rad(camera.angle));
 
     shader_set_uniform_m4(shader_program, "view", view_matrix);
 

@@ -101,6 +101,12 @@ mesh_new(struct model *model)
 
     glEnableVertexAttribArray(1);
 
+    /* textures */
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE,
+            8 * sizeof (GLfloat), (GLvoid *) (5 * sizeof (GLfloat)));
+
+    glEnableVertexAttribArray(2);
+
     /* unbind vao */
     glBindVertexArray(0);
 

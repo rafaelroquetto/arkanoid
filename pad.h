@@ -14,6 +14,8 @@ struct pad
     GLfloat speed;
     GLint angle;
 
+    GLuint texture;
+
     struct mesh *mesh;
 
     mat4x4 model_matrix;

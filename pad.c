@@ -10,6 +10,7 @@
 #include "mesh.h"
 #include "objects.h"
 #include "utils.h"
+#include "texture.h"
 
 static const GLfloat PAD_THROTTLE = 0.6f;
 static const GLfloat MAX_SPEED = 1.7f;
@@ -18,6 +19,9 @@ static const GLfloat SCALE_FACTOR = 0.4;
 
 static int mesh_ref_count = 0;
 static struct mesh *mesh = NULL;
+
+static int texture_ref_count = 0;
+static GLuint texture = 0;
 
 static struct mesh *
 pad_mesh(void)
@@ -47,6 +51,32 @@ pad_mesh_free(void)
     }
 }
 
+static GLuint
+pad_texture(void)
+{
+    if (texture_ref_count == 0) {
+        texture = load_texture_from_png(
+                "resource/pad_texture.png", NULL, NULL);
+    }
+
+    ++texture_ref_count;
+
+    return texture;
+}
+
+static void
+pad_texture_free(void)
+{
+    if (texture_ref_count == 0)
+        return;
+
+    --texture_ref_count;
+
+    if (texture_ref_count == 0) {
+        glDeleteTextures(1, &texture);
+    }
+}
+
 struct pad *
 pad_new(void)
 {
@@ -56,6 +86,7 @@ pad_new(void)
     p->speed = 0.0;
     p->angle = -90.0;
     p->mesh = pad_mesh();
+    p->texture = pad_texture();
 
     return p;
 }
@@ -65,6 +96,7 @@ pad_free(struct pad *p)
 {
     free(p);
     pad_mesh_free();
+    pad_texture_free();
 }
 
 void
@@ -76,6 +108,7 @@ pad_draw(void *object, GLuint shader_program)
     shader_set_uniform_m4(shader_program, "normalModel", pad->normal_matrix);
     shader_set_uniform_i(shader_program, "objectType", OBJECT_PAD);
 
+    glBindTexture(GL_TEXTURE_2D, pad->texture);
     glBindVertexArray(pad->mesh->vao);
     glDrawArrays(GL_TRIANGLES, 0, pad->mesh->vertex_count);
     glBindVertexArray(0);

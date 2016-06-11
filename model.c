@@ -9,6 +9,7 @@
 #include <strings.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "panic.h"
 #include "bytearray.h"
