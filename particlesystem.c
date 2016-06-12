@@ -10,6 +10,7 @@
 #include "texture.h"
 
 static const float LIFE_FACTOR = 1e-2;
+static const float FADE_STEP = 0.01;
 
 static int texture_ref_count = 0;
 static GLuint texture = 0;
@@ -120,7 +121,7 @@ particle_system_free(struct particle_system *p)
 static int
 particle_alive(struct particle *p)
 {
-    return (int) ((float) p->speed > LIFE_FACTOR);
+    return (int) ((float) p->a > LIFE_FACTOR);
 }
 
 static void
@@ -129,7 +130,7 @@ update_particle(struct particle *p)
     float rad;
 
 
-    if (p->speed == 0)
+    if (p->a == 0)
         return;
 
     rad = deg_to_rad(p->angle);
@@ -139,8 +140,10 @@ update_particle(struct particle *p)
 
     p->speed += p->accel;
 
-    if (p->speed <= LIFE_FACTOR)
-        p->speed = 0;
+    p->a -= FADE_STEP;
+
+    if (p->a <= LIFE_FACTOR)
+        p->a = 0;
 }
 
 static void

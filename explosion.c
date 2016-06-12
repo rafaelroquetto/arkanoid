@@ -3,22 +3,22 @@
 #include "particlesystem.h"
 #include "explosion.h"
 
+enum { PARTICLE_COUNT = 400 };
+
 static void
 setup_particle(struct explosion *e, struct particle *p)
 {
     p->x = e->x;
     p->y = e->y;
     p->z = 2.0;
-    p->weight = 1.0;
 
     p->r = (rand() % 101) / 100.0;
     p->g = (rand() % 101) / 100.0;
     p->b = (rand() % 101) / 100.0;
-    p->a = (rand() % 101) / 100.0;
+    p->a = 1.0;
 
     p->angle = rand() % 365;
     p->speed = (rand() % 4) / 10.0;
-    p->ini_speed = 0.9;
     p->accel = -0.001;
 }
 
@@ -43,8 +43,7 @@ explosion_new(float x, float y, float z)
     e->x = x;
     e->y = y;
     e->z = z;
-    e->system = particle_system_new(100);
-   // e->system = particle_system_new(MAX_PARTICLES);
+    e->system = particle_system_new(PARTICLE_COUNT);
 
     setup_particles(e);
 

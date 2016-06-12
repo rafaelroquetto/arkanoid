@@ -19,9 +19,6 @@ struct particle
     GLfloat r, g, b, a;
 
     float angle;
-    float weight;
-    float life;
-    float ini_speed;
     float speed;
     float accel;
 };
