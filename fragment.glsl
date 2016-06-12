@@ -13,7 +13,7 @@ uniform sampler2D padTexture;
 
 void main()
 {
-    vec3 LightPosition = vec3(50.0, 10.0, 40.0);
+    vec3 LightPosition = vec3(0.0, 20.0, 10.0);
 
     // ambient light
     float ambientStrength = 0.2f;
@@ -22,7 +22,7 @@ void main()
 
     switch (objectType) {
     case 0: // pad
-        //vec4 blendColor = vec4(1.0f, 1.0f, 1.0f, 1.0);
+        //vec4 blendColor = vec4(gl_FragCoord.x/800, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, 1.0);
         //objectColor = texture(padTexture, TexCoord) * blendColor;
         objectColor = texture(padTexture, TexCoord);
         break;
