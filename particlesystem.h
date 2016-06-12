@@ -43,6 +43,8 @@ struct particle_system
 
     GLfloat position_data[DATA_BUFFER_SIZE];
     GLfloat color_data[DATA_BUFFER_SIZE];
+
+    GLuint texture;
 };
 
 struct particle_system * particle_system_new(int count);

@@ -27,6 +27,7 @@ void main()
        gl_Position = projection * view * ppos;
 
        PartColor = partColor;
+       TexCoord = texCoord;
    } else {
 
        gl_Position = projection * view * model * vec4(position, 1.0);

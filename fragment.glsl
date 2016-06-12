@@ -58,7 +58,9 @@ void main()
         color = result;
     } else {
         //color = PartColor;
-        color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w);
+        objectColor = texture(padTexture, TexCoord);
+        color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w) * objectColor;
+        //color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w);
     }
 }
 

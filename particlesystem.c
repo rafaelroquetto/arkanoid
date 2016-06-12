@@ -7,41 +7,47 @@
 #include "objects.h"
 #include "particlesystem.h"
 #include "utils.h"
-
-#if 0
-static int
-find_dead_particle(struct particle_system *p)
-{
-    int i;
-
-    for (i = p->last_dead; i < MAX_PARTICLES; ++i) {
-        if (p->particles[i].life < 0.0) {
-            p->last_dead = i;
-            return i;
-        }
-    }
-
-    for (i = 0; i < p->last_dead; ++i) {
-        if (p->particles[i].life < 0.0) {
-            p->last_dead = i;
-            return i;
-        }
-    }
-
-    return 0;
-}
-#endif
+#include "texture.h"
 
 static const float LIFE_FACTOR = 1e-2;
+
+static int texture_ref_count = 0;
+static GLuint texture = 0;
+
+static GLuint
+particle_texture(void)
+{
+    if (texture_ref_count == 0) {
+        texture = load_texture_from_png(
+                "resource/particle.png", NULL, NULL);
+    }
+
+    ++texture_ref_count;
+
+    return texture;
+}
+
+static void
+particle_texture_free(void)
+{
+    if (texture_ref_count == 0)
+        return;
+
+    --texture_ref_count;
+
+    if (texture_ref_count == 0) {
+        glDeleteTextures(1, &texture);
+    }
+}
 
 static void
 setup_system(struct particle_system *p)
 {
     static const GLfloat vertices[] = {
-        -0.1f, -0.1f, 0.0f,
-        0.1f, -0.1f, 0.0f,
-        -0.1f, 0.1f, 0.0f,
-        0.1f, 0.1f, 0.0f,
+        -0.1f, -0.1f, 0.0f, 0.0, 0.0,
+         0.1f, -0.1f, 0.0f, 1.0, 0.0,
+        -0.1f,  0.1f, 0.0f, 0.0, 1.0,
+         0.1f,  0.1f, 0.0f, 1.0, 1.0
     };
 
     glGenVertexArrays(1, &p->vertex_vao);
@@ -53,8 +59,13 @@ setup_system(struct particle_system *p)
     glBindBuffer(GL_ARRAY_BUFFER, p->vertex_buffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof (vertices),  vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(PARTICLE_VERTEX_VAO, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid *) 0);
+    glVertexAttribPointer(PARTICLE_VERTEX_VAO, 3, GL_FLOAT, GL_FALSE,
+            5 * sizeof (GLfloat), (GLvoid *) 0);
     glEnableVertexAttribArray(PARTICLE_VERTEX_VAO);
+
+    glVertexAttribPointer(TEXTURE_VAO, 2, GL_FLOAT, GL_TRUE,
+            5 * sizeof (GLfloat), (GLvoid *) (3 * sizeof (GLfloat)));
+    glEnableVertexAttribArray(TEXTURE_VAO);
 
     /* particles positions and sizes
      * initialize it as a NULL buffer
@@ -89,6 +100,7 @@ particle_system_new(int count)
     p->count = count;
     p->last_dead = 0;
     p->alive = 1;
+    p->texture = particle_texture();
 
     return p;
 }
@@ -96,6 +108,8 @@ particle_system_new(int count)
 void
 particle_system_free(struct particle_system *p)
 {
+    particle_texture_free();
+
     glDeleteVertexArrays(1, &p->vertex_vao);
     glDeleteBuffers(1, &p->vertex_buffer);
     glDeleteBuffers(1, &p->position_buffer);
@@ -107,7 +121,6 @@ static int
 particle_alive(struct particle *p)
 {
     return (int) ((float) p->speed > LIFE_FACTOR);
-    //return 1;
 }
 
 static void
@@ -203,6 +216,8 @@ particle_system_draw(void *object, GLuint shader_program)
     p = (struct particle_system *) object;
 
     shader_set_uniform_i(shader_program, "objectType", OBJECT_PARTICLE);
+
+    glBindTexture(GL_TEXTURE_2D, p->texture);
 
     glBindVertexArray(p->vertex_vao);
 
