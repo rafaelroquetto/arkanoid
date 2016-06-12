@@ -18,7 +18,7 @@ setup_particle(struct explosion *e, struct particle *p)
     p->a = 1.0;
 
     p->angle = rand() % 365;
-    p->speed = (rand() % 4) / 10.0;
+    p->speed = (rand() % 9) / 10.0;
     p->accel = -0.001;
 }
 
