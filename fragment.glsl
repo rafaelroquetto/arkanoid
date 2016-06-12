@@ -4,6 +4,7 @@ in vec3 Normal;
 in vec3 FragPos;
 in vec4 gl_FragCoord;
 in vec2 TexCoord;
+in vec4 PartColor;
 
 out vec4 color;
 
@@ -22,8 +23,6 @@ void main()
 
     switch (objectType) {
     case 0: // pad
-        //vec4 blendColor = vec4(gl_FragCoord.x/800, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, 1.0);
-        //objectColor = texture(padTexture, TexCoord) * blendColor;
         objectColor = texture(padTexture, TexCoord);
         break;
     case 1: // brick
@@ -31,6 +30,9 @@ void main()
         break;
     case 2: // ball
         objectColor = vec4(0.5f, 0.5f, 0.4f, 1.0);
+        break;
+    case 3: // particle
+        objectColor = PartColor;
         break;
     }
 
@@ -51,8 +53,12 @@ void main()
     vec3 specular = specularStrength * spec * lightColor;
 
 
-    vec4 result = vec4((ambient + diffuse + specular), 1.0) * objectColor;
-    //color = vec4(result, 1.0f);
-    color = result;
+    if (objectType != 3) {
+        vec4 result = vec4((ambient + diffuse + specular), 1.0) * objectColor;
+        color = result;
+    } else {
+        //color = PartColor;
+        color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w);
+    }
 }
 

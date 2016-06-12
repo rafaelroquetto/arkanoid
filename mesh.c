@@ -89,23 +89,23 @@ mesh_new(struct model *model)
      */
 
     /* vertices */
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(VERTEX_VAO, 3, GL_FLOAT, GL_FALSE,
             8 * sizeof (GLfloat), (GLvoid *) 0);
 
     /* place data on shader location 0 */
-    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(VERTEX_VAO);
 
     /* normals */
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(NORMAL_VAO, 3, GL_FLOAT, GL_FALSE,
             8 * sizeof (GLfloat), (GLvoid *) (3 * sizeof (GLfloat)));
 
-    glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(NORMAL_VAO);
 
     /* textures */
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_TRUE,
+    glVertexAttribPointer(TEXTURE_VAO, 2, GL_FLOAT, GL_TRUE,
             8 * sizeof (GLfloat), (GLvoid *) (5 * sizeof (GLfloat)));
 
-    glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(TEXTURE_VAO);
 
     /* unbind vao */
     glBindVertexArray(0);

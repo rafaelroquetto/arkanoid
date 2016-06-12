@@ -23,6 +23,15 @@ enum offsets {
     NORMAL_OFFSET = 2
 };
 
+enum vao_layout {
+    VERTEX_VAO = 0,
+    NORMAL_VAO = 1,
+    TEXTURE_VAO = 2,
+    PARTICLE_VERTEX_VAO = 3,
+    PARTICLE_POSITION_VAO = 4,
+    PARTICLE_COLOR_VAO = 5
+};
+
 static const float WORLD_BOUNDARY_X = 16.5;
 static const float WORLD_BOUNDARY_Y = 31.5;
 

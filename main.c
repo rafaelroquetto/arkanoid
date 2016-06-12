@@ -19,6 +19,7 @@
 #include "boundingbox.h"
 #include "list.h"
 #include "brick.h"
+#include "explosion.h"
 
 static GLFWwindow *window = NULL;
 
@@ -27,6 +28,8 @@ static struct pad *pad = NULL;
 static struct level *level = NULL;
 
 static struct ball *ball = NULL;
+
+struct list *explosions = NULL;
 
 /* "joypad" state */
 enum {
@@ -81,6 +84,51 @@ start_game(void)
 {
     game_state = RUNNING;
     ball_set_speed(ball, 0.2);
+}
+
+static void
+create_explosion(float x, float y, float z)
+{
+    struct explosion *e;
+
+    e = explosion_new(x, y, z);
+
+    list_add(explosions, (void *) e);
+}
+
+static void
+explosions_update(void *object)
+{
+    struct list *explosions;
+    struct node *n;
+    struct explosion *explosion;
+
+    explosions = (struct list *) object;
+
+    for (n = explosions->first; n; n = n->next) {
+        explosion_update(n->data);
+
+        explosion = n->data;
+
+        if (!explosion_alive(explosion)) {
+            list_remove(explosions, n);
+            explosion_free(explosion);
+            break;
+        }
+    }
+}
+
+static void
+explosions_draw(void *object, GLuint shader_program)
+{
+    struct list *explosions;
+    struct node *n;
+
+    explosions = (struct list *) object;
+
+    for (n = explosions->first; n; n = n->next) {
+        explosion_draw(n->data, shader_program);
+    }
 }
 
 static void
@@ -183,6 +231,7 @@ static struct update_ctx update_contexts[] = {
     { pad_update, (void **) &pad },
     { level_update, (void **) &level },
     { ball_update, (void **) &ball },
+    { explosions_update, (void **) &explosions },
     { NULL }
 };
 
@@ -210,9 +259,9 @@ check_ball_brick_collision(struct ball *b, struct level *l)
             continue;
 
         if (bb_intersects(&b->box, &brick->box)) {
-            printf("Intersects!\n");
             ball_set_direction(ball, -b->angle);
             brick_set_alive(brick, GL_FALSE);
+            create_explosion(b->x, b->y, 2.0);
             break;
         }
     }
@@ -262,6 +311,7 @@ static struct draw_ctx draw_contexts[] = {
     { pad_draw, (void **) &pad },
     { level_draw, (void **) &level },
     { ball_draw, (void **) &ball },
+    { explosions_draw, (void **) &explosions },
     { NULL }
 };
 
@@ -310,6 +360,8 @@ init_objects(void)
     level = level_new();
 
     ball = ball_new();
+
+    explosions = list_new();
 }
 
 static void
