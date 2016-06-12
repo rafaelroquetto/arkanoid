@@ -31,6 +31,8 @@ static struct ball *ball = NULL;
 
 struct list *explosions = NULL;
 
+enum { DEBUG_BOXES = 0 };
+
 /* "joypad" state */
 enum {
     PAD_UP = 1,
@@ -70,7 +72,7 @@ reset_game(void)
 
     pad->x = 0.0;
     ball->x = pad->x;
-    ball->y = 0.6;
+    ball->y = 0.7;
     ball->z = 0.0;
 
     camera.x = 0.0;
@@ -241,7 +243,7 @@ check_ball_pad_collision(struct ball *b, struct pad *p)
     if (game_state == RESET)
         return;
 
-    if (bb_intersects(&b->box, &p->box)) {
+    if (bb_intersects_top(&b->box, &p->box)) {
         ball_set_direction(ball, -b->angle);
     }
 }
@@ -347,6 +349,11 @@ draw(GLuint shader_program)
 
     for (ctx = draw_contexts; ctx->func; ++ctx) {
         ctx->func(*ctx->object, shader_program);
+    }
+
+    if (DEBUG_BOXES) {
+        bb_draw(&ball->box, shader_program);
+        bb_draw(&pad->box, shader_program);
     }
 }
 

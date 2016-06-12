@@ -150,6 +150,7 @@ update_bounding_box(struct pad *p)
     mat4x4 m;
     mat4x4_identity(m);
     mat4x4_translate_in_place(m, p->x, 0.0, 0.0);
+    mat4x4_scale_aniso(m, m, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
     p->box = p->mesh->bounding_box;
 
     mat4x4_mul_vec3(p->box.min, m, p->box.min);

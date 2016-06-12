@@ -6,7 +6,7 @@
 
 static const float H_DISTANCE = 6.0;
 static const float V_DISTANCE = 4.0;
-static const float DEPTH = 4.0;
+static const float DEPTH = 0.0;
 static const float X_ORIG = -60.0;
 static const float Y_ORIG = 60.0;
 

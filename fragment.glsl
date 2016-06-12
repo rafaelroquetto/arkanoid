@@ -53,14 +53,16 @@ void main()
     vec3 specular = specularStrength * spec * lightColor;
 
 
-    if (objectType != 3) {
-        vec4 result = vec4((ambient + diffuse + specular), 1.0) * objectColor;
-        color = result;
-    } else {
+    if (objectType == 3) {
         //color = PartColor;
         objectColor = texture(padTexture, TexCoord);
         color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w) * objectColor;
         //color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w);
+    } else if (objectType == 4) {
+        color = vec4(0.0, 1.0, 0.0, 1.0);
+    } else {
+        vec4 result = vec4((ambient + diffuse + specular), 1.0) * objectColor;
+        color = result;
     }
 }
 

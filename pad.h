@@ -1,7 +1,7 @@
 #ifndef PAD_H
 #define PAD_H
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 #include "linmath.h"
 #include "boundingbox.h"

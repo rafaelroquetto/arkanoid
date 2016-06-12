@@ -1,7 +1,7 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
-#include <GL/gl.h>
+#include <GL/glew.h>
 
 enum {
     LEVEL_COLUMNS = 20,

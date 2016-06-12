@@ -28,6 +28,8 @@ void main()
 
        PartColor = partColor;
        TexCoord = texCoord;
+   } else if (objectType == 4) {
+        gl_Position = projection * view * vec4(position, 1.0);
    } else {
 
        gl_Position = projection * view * model * vec4(position, 1.0);
