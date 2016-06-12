@@ -44,6 +44,7 @@ enum {
 };
 
 enum state {
+    INTRO,
     RESET,
     RUNNING
 };
@@ -62,6 +63,12 @@ struct camera
 
 static struct camera camera;
 
+static const float CAMERA_X = 0.0;
+static const float CAMERA_Y = -15.0;
+static const float CAMERA_Z = -40.0;
+static const float CAMERA_ANGLE = 0.0;
+static const float CAMERA_STEP = 0.5;
+
 static void
 reset_game(void)
 {
@@ -75,10 +82,10 @@ reset_game(void)
     ball->y = 0.7;
     ball->z = 0.0;
 
-    camera.x = 0.0;
-    camera.y = -15.0;
-    camera.z = -40.0;
-    camera.angle = 0.0;
+    camera.x = CAMERA_X;
+    camera.y = CAMERA_Y;
+    camera.z = CAMERA_Z;
+    camera.angle = CAMERA_ANGLE;
 }
 
 static void
@@ -86,6 +93,29 @@ start_game(void)
 {
     game_state = RUNNING;
     ball_set_speed(ball, 0.2);
+}
+
+static void
+reset_to_intro(void)
+{
+    game_state = INTRO;
+
+    camera.x = 10.0;
+    camera.y = -10.0;
+    camera.z = 1.0;
+}
+
+static void
+update_camera(void)
+{
+    if (!fuzzy_compare(camera.x, CAMERA_X))
+        camera.x -= CAMERA_STEP;
+    else if (!fuzzy_compare(camera.y, CAMERA_Y))
+        camera.y -= CAMERA_STEP;
+    else if (!fuzzy_compare(camera.z, CAMERA_Z))
+        camera.z -= CAMERA_STEP;
+    else
+        game_state = RESET;
 }
 
 static void
@@ -153,19 +183,19 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
             else
                 start_game();
         } else if (key == GLFW_KEY_W) {
-            camera.z += 0.5;
+            camera.z += CAMERA_STEP;
         } else if (key == GLFW_KEY_S) {
-            camera.z -= 0.5;
+            camera.z -= CAMERA_STEP;
         } else if (key == GLFW_KEY_A) {
-            camera.x += 0.5;
+            camera.x += CAMERA_STEP;
         } else if (key == GLFW_KEY_D) {
-            camera.x -= 0.5;
+            camera.x -= CAMERA_STEP;
         } else if (key == GLFW_KEY_Q) {
-            camera.y += 0.5;
+            camera.y += CAMERA_STEP;
         } else if (key == GLFW_KEY_E) {
-            camera.y -= 0.5;
+            camera.y -= CAMERA_STEP;
         } else if (key == GLFW_KEY_R) {
-            camera.angle += 2.0;
+            camera.angle += CAMERA_STEP;
         }
 
         break;
@@ -292,6 +322,9 @@ update(void)
         ball->x = pad->x;
 
     check_collisions();
+
+    if (game_state == INTRO)
+        update_camera();
 
     ctx = update_contexts;
 
@@ -423,6 +456,8 @@ int main(int argc, char *argv[])
     init_objects();
 
     reset_game();
+
+    reset_to_intro();
 
     handle_events();
 
