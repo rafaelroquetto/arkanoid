@@ -267,6 +267,22 @@ static struct update_ctx update_contexts[] = {
     { NULL }
 };
 
+static inline float
+calculate_new_angle(struct ball *b, struct pad *p)
+{
+    static const float MAX_ANGLE = 75.0;
+    float pad_half_width;
+    float angle_factor;
+
+    pad_half_width = bb_width(&p->box) * 0.5;
+
+    angle_factor =
+        (bb_horizontal_center(&b->box)
+         - bb_horizontal_center(&p->box)) / pad_half_width;
+
+    return MAX_ANGLE * (1 - angle_factor);
+}
+
 static void
 check_ball_pad_collision(struct ball *b, struct pad *p)
 {
@@ -274,9 +290,10 @@ check_ball_pad_collision(struct ball *b, struct pad *p)
         return;
 
     if (bb_intersects_top(&b->box, &p->box)) {
-        ball_set_direction(ball, -b->angle);
+        ball_set_direction(ball, calculate_new_angle(b, p));
     }
 }
+
 
 static void
 check_ball_brick_collision(struct ball *b, struct level *l)

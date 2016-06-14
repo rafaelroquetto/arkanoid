@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "texture.h"
 
-static const GLfloat PAD_THROTTLE = 0.6f;
+static const GLfloat PAD_THROTTLE = 0.3f;
 static const GLfloat MAX_SPEED = 1.7f;
 static const GLfloat PAD_FRICTION = 0.1f;
 static const GLfloat SCALE_FACTOR = 0.4;

@@ -23,6 +23,16 @@ int bb_intersects_top(struct bounding_box *a,
          && (a->min[COORD_Z] + THRESHOLD < b->max[COORD_Z] && a->max[COORD_Z] + THRESHOLD > b->min[COORD_Z]));
 }
 
+float bb_width(struct bounding_box *b)
+{
+    return (b->max[COORD_X] - b->min[COORD_X]);
+}
+
+float bb_horizontal_center(struct bounding_box *b)
+{
+    return b->min[COORD_X] + (b->max[COORD_X] - b->min[COORD_X])/2;
+}
+
 void
 bb_draw(struct bounding_box *b, GLuint shader_program)
 {

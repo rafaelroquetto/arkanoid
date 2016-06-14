@@ -17,4 +17,7 @@ int bb_intersects_top(struct bounding_box *a,
 
 void bb_draw(struct bounding_box *b, GLuint shader_program);
 
+float bb_width(struct bounding_box *b);
+float bb_horizontal_center(struct bounding_box *b);
+
 #endif /* BOUNDINGBOX_H */
