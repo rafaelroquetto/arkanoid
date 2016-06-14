@@ -291,6 +291,7 @@ check_ball_pad_collision(struct ball *b, struct pad *p)
 
     if (bb_intersects_top(&b->box, &p->box)) {
         ball_set_direction(ball, calculate_new_angle(b, p));
+        pad_bump(p);
     }
 }
 

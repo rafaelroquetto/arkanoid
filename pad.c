@@ -16,6 +16,8 @@ static const GLfloat PAD_THROTTLE = 0.3f;
 static const GLfloat MAX_SPEED = 1.7f;
 static const GLfloat PAD_FRICTION = 0.1f;
 static const GLfloat SCALE_FACTOR = 0.4;
+static const GLfloat MAX_SPRING = 0.4;
+static const GLfloat SPRING_FORCE = 0.1;
 
 static int mesh_ref_count = 0;
 static struct mesh *mesh = NULL;
@@ -84,6 +86,7 @@ pad_new(void)
 
     p->x = 0.0;
     p->speed = 0.0;
+    p->spring_strength = 0.0;
     p->angle = -90.0;
     p->mesh = pad_mesh();
     p->texture = pad_texture();
@@ -137,7 +140,7 @@ static void
 recalculate_matrices(struct pad *p)
 {
     mat4x4_identity(p->model_matrix);
-    mat4x4_translate_in_place(p->model_matrix, p->x, 0.0, 0.0);
+    mat4x4_translate_in_place(p->model_matrix, p->x, -p->spring_strength, 0.0);
     mat4x4_scale_aniso(p->model_matrix, p->model_matrix, SCALE_FACTOR, SCALE_FACTOR, SCALE_FACTOR);
 
     mat4x4_invert(p->normal_matrix, p->model_matrix);
@@ -165,6 +168,11 @@ pad_update(void *object)
     struct pad *p = (struct pad *) object;
 
     p->x += p->speed;
+
+    if (fuzzy_compare(p->spring_strength, 0.0))
+        p->spring_strength = 0.0;
+    else
+        p->spring_strength -= SPRING_FORCE;
 
     signal = (p->speed > 0) ? 1 : -1;
 
@@ -203,4 +211,10 @@ pad_rotate_x(struct pad *p)
     p->angle += 10;
 
     p->angle = p->angle % 360;
+}
+
+void
+pad_bump(struct pad *p)
+{
+    p->spring_strength = MAX_SPRING;
 }

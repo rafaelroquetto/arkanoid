@@ -12,6 +12,7 @@ struct pad
 {
     GLfloat x;
     GLfloat speed;
+    GLfloat spring_strength;
     GLint angle;
 
     GLuint texture;
@@ -32,5 +33,6 @@ void pad_update(void *object);
 void pad_throttle_left(struct pad *p);
 void pad_throttle_right(struct pad *p);
 void pad_rotate_x(struct pad *p);
+void pad_bump(struct pad *p);
 
 #endif /* PAD_H */
