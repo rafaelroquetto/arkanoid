@@ -20,6 +20,8 @@
 #include "list.h"
 #include "brick.h"
 #include "explosion.h"
+#include "explosions.h"
+#include "camera.h"
 
 static GLFWwindow *window = NULL;
 
@@ -29,7 +31,7 @@ static struct level *level = NULL;
 
 static struct ball *ball = NULL;
 
-struct list *explosions = NULL;
+static struct list *explosions = NULL;
 
 enum { DEBUG_BOXES = 0 };
 
@@ -39,8 +41,6 @@ enum {
     PAD_DOWN = 2,
     PAD_LEFT = 4,
     PAD_RIGHT = 8,
-    PAD_FIRE = 16,
-    PAD_PULSE = 32
 };
 
 enum state {
@@ -52,14 +52,6 @@ enum state {
 static unsigned pad_state;
 
 static unsigned game_state;
-
-struct camera
-{
-    GLfloat x;
-    GLfloat y;
-    GLfloat z;
-    GLfloat angle;
-};
 
 static struct camera camera;
 
@@ -77,6 +69,7 @@ reset_game(void)
     ball_set_speed(ball, 0.0);
     ball_reset_direction(ball);
 
+    pad->speed = 0.0;
     pad->x = 0.0;
     ball->x = pad->x;
     ball->y = 0.7;
@@ -116,51 +109,6 @@ update_camera(void)
         camera.z -= CAMERA_STEP;
     else
         game_state = RESET;
-}
-
-static void
-create_explosion(float x, float y, float z)
-{
-    struct explosion *e;
-
-    e = explosion_new(x, y, z);
-
-    list_add(explosions, (void *) e);
-}
-
-static void
-explosions_update(void *object)
-{
-    struct list *explosions;
-    struct node *n;
-    struct explosion *explosion;
-
-    explosions = (struct list *) object;
-
-    for (n = explosions->first; n; n = n->next) {
-        explosion_update(n->data);
-
-        explosion = n->data;
-
-        if (!explosion_alive(explosion)) {
-            list_remove(explosions, n);
-            explosion_free(explosion);
-            break;
-        }
-    }
-}
-
-static void
-explosions_draw(void *object, GLuint shader_program)
-{
-    struct list *explosions;
-    struct node *n;
-
-    explosions = (struct list *) object;
-
-    for (n = explosions->first; n; n = n->next) {
-        explosion_draw(n->data, shader_program);
-    }
 }
 
 static void
@@ -311,7 +259,7 @@ check_ball_brick_collision(struct ball *b, struct level *l)
         if (bb_intersects(&b->box, &brick->box)) {
             ball_set_direction(ball, -b->angle);
             brick_set_alive(brick, GL_FALSE);
-            create_explosion(b->x, b->y, 2.0);
+            explosions_create(explosions, b->x, b->y, 2.0);
             break;
         }
     }
@@ -333,8 +281,6 @@ update(void)
         pad_throttle_left(pad);
     if (pad_state & PAD_RIGHT)
         pad_throttle_right(pad);
-    if (pad_state & PAD_UP)
-        pad_rotate_x(pad);
 
     if (game_state == RESET)
         ball->x = pad->x;
@@ -419,7 +365,7 @@ init_objects(void)
 
     ball = ball_new();
 
-    explosions = list_new();
+    explosions = explosions_new();
 }
 
 static void
@@ -432,6 +378,8 @@ free_objects(void)
     level_free(level);
 
     ball_free(ball);
+
+    explosions_free(explosions);
 }
 
 static void
