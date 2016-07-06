@@ -332,6 +332,8 @@ setup_uniforms(GLuint shader_program)
 
     shader_set_uniform_m4(shader_program, "projection", projection_matrix);
     shader_set_uniform_3f(shader_program, "viewPos", camera.x, camera.y, camera.z);
+    shader_set_uniform_i(shader_program, "viewWidth", VIEWPORT_WIDTH);
+    shader_set_uniform_i(shader_program, "viewHeight", VIEWPORT_HEIGHT);
 }
 
 static void

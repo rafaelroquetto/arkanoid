@@ -9,33 +9,40 @@ in vec4 PartColor;
 out vec4 color;
 
 uniform int objectType;
+uniform int viewWidth;
+uniform int viewHeight;
 uniform vec3 viewPos;
 uniform sampler2D padTexture;
+
+const int PAD          = 0;
+const int BRICK        = 1;
+const int BALL         = 2;
+const int PARTICLE     = 3;
+const int BOUNDINGBOX  = 4;
+
+vec4 getObjectColor()
+{
+    switch (objectType) {
+    case PAD:
+        return texture(padTexture, TexCoord);
+    case BRICK:
+        return vec4(gl_FragCoord.x/viewWidth, gl_FragCoord.y/viewHeight, gl_FragCoord.x/gl_FragCoord.y, 1.0);
+    case BALL:
+        return vec4(0.5f, 0.5f, 0.4f, 1.0);
+    case PARTICLE:
+        return texture(padTexture, TexCoord);
+    }
+}
 
 void main()
 {
     vec3 LightPosition = vec3(0.0, 20.0, 10.0);
 
+
+    vec4 objectColor = getObjectColor();
+
     // ambient light
     float ambientStrength = 0.2f;
-
-    vec4 objectColor;
-
-    switch (objectType) {
-    case 0: // pad
-        objectColor = texture(padTexture, TexCoord);
-        break;
-    case 1: // brick
-        objectColor = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, 1.0);
-        break;
-    case 2: // ball
-        objectColor = vec4(0.5f, 0.5f, 0.4f, 1.0);
-        break;
-    case 3: // particle
-        objectColor = PartColor;
-        break;
-    }
-
     vec3 lightColor = vec3(1.0f, 1.0f, 1.0f);
     vec3 ambient = ambientStrength * lightColor;
 
@@ -52,17 +59,16 @@ void main()
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
     vec3 specular = specularStrength * spec * lightColor;
 
-
-    if (objectType == 3) {
-        //color = PartColor;
-        objectColor = texture(padTexture, TexCoord);
-        color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w) * objectColor;
-        //color = vec4(gl_FragCoord.x/1024, gl_FragCoord.y/768, gl_FragCoord.x/gl_FragCoord.y, PartColor.w);
-    } else if (objectType == 4) {
+    switch (objectType) {
+    case PARTICLE:
+        color = vec4(gl_FragCoord.x/viewWidth, gl_FragCoord.y/viewHeight, gl_FragCoord.x/gl_FragCoord.y, PartColor.w) * objectColor;
+        break;
+    case BOUNDINGBOX:
         color = vec4(0.0, 1.0, 0.0, 1.0);
-    } else {
-        vec4 result = vec4((ambient + diffuse + specular), 1.0) * objectColor;
-        color = result;
+        break;
+    default:
+        color = vec4((ambient + diffuse + specular), 1.0) * objectColor;
+        break;
     }
 }
 

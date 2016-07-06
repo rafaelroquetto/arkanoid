@@ -20,24 +20,33 @@ out vec3 FragPos;
 out vec2 TexCoord;
 out vec4 PartColor;
 
+const int PARTICLE     = 3;
+const int BOUNDINGBOX  = 4;
+
 void main()
 {
-   if (objectType == 3) { /* particle */
-       vec4 ppos = vec4(partCoord, 1.0) + partPosition;
-       gl_Position = projection * view * ppos;
+    switch (objectType) {
+    case PARTICLE:
+        vec4 ppos = vec4(partCoord, 1.0) + partPosition;
+        gl_Position = projection * view * ppos;
 
-       PartColor = partColor;
-       TexCoord = texCoord;
-   } else if (objectType == 4) {
+        PartColor = partColor;
+        TexCoord = texCoord;
+        break;
+
+    case BOUNDINGBOX:
         gl_Position = projection * view * vec4(position, 1.0);
-   } else {
+        break;
 
-       gl_Position = projection * view * model * vec4(position, 1.0);
+    default:
+        gl_Position = projection * view * model * vec4(position, 1.0);
 
-       Normal = mat3(normalModel)*normal;
+        Normal = mat3(normalModel)*normal;
 
-       FragPos = vec3(model * vec4(position, 1.0));
-       TexCoord = texCoord;
-   }
+        FragPos = vec3(model * vec4(position, 1.0));
+        TexCoord = texCoord;
+
+        break;
+    }
 }
 
