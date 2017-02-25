@@ -13,12 +13,11 @@ struct level
     GLfloat x;
     GLfloat y;
 
-    int map[LEVEL_ROWS][LEVEL_COLUMNS];
-
     struct list *bricks;
 };
 
 struct level * level_new(void);
+struct level * level_from_file(const char *path);
 
 void level_free(struct level *p);
 void level_draw(void *object, GLuint shader_program);

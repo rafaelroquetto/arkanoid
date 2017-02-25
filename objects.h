@@ -7,7 +7,8 @@ enum objects
     OBJECT_BRICK,
     OBJECT_BALL,
     OBJECT_PARTICLE,
-    OBJECT_BOUNDING_BOX
+    OBJECT_BOUNDING_BOX,
+    OBJECT_HARD_BRICK
 };
 
 #endif /* OBJECTS_H */

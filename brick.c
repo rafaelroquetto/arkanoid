@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <GL/glew.h>
 
 #include "brick.h"
@@ -62,6 +63,22 @@ brick_free(struct brick *b)
     brick_mesh_free();
 }
 
+static int brick_object_type(const struct brick *b)
+{
+    switch (b->type) {
+    case NORMAL:
+        return OBJECT_BRICK;
+    case HARD:
+        return OBJECT_HARD_BRICK;
+    default:
+        break;
+    }
+
+    fprintf(stderr, "Unknown brick type '%d'\n", b->type);
+
+    return OBJECT_BRICK;
+}
+
 void
 brick_draw(void *object, GLuint shader_program)
 {
@@ -69,7 +86,8 @@ brick_draw(void *object, GLuint shader_program)
 
     shader_set_uniform_m4(shader_program, "model", brick->model_matrix);
     shader_set_uniform_m4(shader_program, "normalModel", brick->normal_matrix);
-    shader_set_uniform_i(shader_program, "objectType", OBJECT_BRICK);
+    shader_set_uniform_i(shader_program, "objectType",
+            brick_object_type(brick));
 
     glBindVertexArray(brick->mesh->vao);
     glDrawArrays(GL_TRIANGLES, 0, brick->mesh->vertex_count);

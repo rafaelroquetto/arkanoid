@@ -165,7 +165,7 @@ static GLFWwindow *
 create_window(void)
 {
     GLFWwindow *window = glfwCreateWindow(VIEWPORT_WIDTH, VIEWPORT_HEIGHT,
-            "Project X", NULL, NULL);
+            "Arkanoid - Space Cowboy", NULL, NULL);
 
     if (window == NULL)
         panic("Failed to create window");
@@ -258,8 +258,10 @@ check_ball_brick_collision(struct ball *b, struct level *l)
 
         if (bb_intersects(&b->box, &brick->box)) {
             ball_set_direction(ball, -b->angle);
-            brick_set_alive(brick, GL_FALSE);
-            explosions_create(explosions, b->x, b->y, 2.0);
+            if (brick->type == NORMAL) {
+                brick_set_alive(brick, GL_FALSE);
+                explosions_create(explosions, b->x, b->y, 2.0);
+            }
             break;
         }
     }
@@ -363,7 +365,7 @@ init_objects(void)
 
     pad = pad_new();
 
-    level = level_new();
+    level = level_from_file("levels/level1.lvl");
 
     ball = ball_new();
 

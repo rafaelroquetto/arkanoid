@@ -19,6 +19,7 @@ const int BRICK        = 1;
 const int BALL         = 2;
 const int PARTICLE     = 3;
 const int BOUNDINGBOX  = 4;
+const int HARD_BRICK   = 5;
 
 vec4 getObjectColor()
 {
@@ -31,6 +32,8 @@ vec4 getObjectColor()
         return vec4(0.5f, 0.5f, 0.4f, 1.0);
     case PARTICLE:
         return texture(padTexture, TexCoord);
+    case HARD_BRICK:
+        return vec4(0.9f, 0.9f, 0.9f, 0.8f);
     }
 }
 

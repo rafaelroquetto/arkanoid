@@ -8,6 +8,11 @@
 
 struct mesh;
 
+typedef enum {
+    NORMAL,
+    HARD
+} brick_type;
+
 struct brick
 {
     GLfloat x;
@@ -22,6 +27,8 @@ struct brick
     mat4x4 normal_matrix;
 
     struct bounding_box box;
+
+    brick_type type;
 };
 
 struct brick * brick_new(void);
