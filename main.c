@@ -33,6 +33,12 @@ static struct ball *ball = NULL;
 
 static struct list *explosions = NULL;
 
+static struct {
+    int level;
+    int lives;
+    int points;
+} game_context;
+
 enum { DEBUG_BOXES = 0 };
 
 /* "joypad" state */
@@ -55,30 +61,40 @@ static unsigned game_state;
 
 static struct camera camera;
 
-static const float CAMERA_X = 0.0;
-static const float CAMERA_Y = -15.0;
-static const float CAMERA_Z = -40.0;
-static const float CAMERA_ANGLE = 0.0;
-static const float CAMERA_STEP = 0.5;
+static void
+reset_ball(void)
+{
+    ball_set_speed(ball, 0.0);
+    ball_reset_direction(ball);
+}
+
+static void
+reset_pad(void)
+{
+    pad->speed = 0.0;
+    pad->x = 0.0;
+    ball->x = pad->x;
+    ball->y = 0.7;
+    ball->z = 0.0;
+}
+
+static void
+reset_game_context(void)
+{
+    game_context.lives = 3;
+    game_context.level = 1;
+    game_context.points = 0;
+}
 
 static void
 reset_game(void)
 {
     game_state = RESET;
 
-    ball_set_speed(ball, 0.0);
-    ball_reset_direction(ball);
-
-    pad->speed = 0.0;
-    pad->x = 0.0;
-    ball->x = pad->x;
-    ball->y = 0.7;
-    ball->z = 0.0;
-
-    camera.x = CAMERA_X;
-    camera.y = CAMERA_Y;
-    camera.z = CAMERA_Z;
-    camera.angle = CAMERA_ANGLE;
+    reset_ball();
+    reset_pad();
+    reset_camera(&camera);
+    reset_game_context();
 }
 
 static void
@@ -96,19 +112,6 @@ reset_to_intro(void)
     camera.x = 10.0;
     camera.y = -10.0;
     camera.z = 1.0;
-}
-
-static void
-update_camera(void)
-{
-    if (!fuzzy_compare(camera.x, CAMERA_X))
-        camera.x -= CAMERA_STEP;
-    else if (!fuzzy_compare(camera.y, CAMERA_Y))
-        camera.y -= CAMERA_STEP;
-    else if (!fuzzy_compare(camera.z, CAMERA_Z))
-        camera.z -= CAMERA_STEP;
-    else
-        game_state = RESET;
 }
 
 static void
@@ -289,8 +292,10 @@ update(void)
 
     check_collisions();
 
-    if (game_state == INTRO)
-        update_camera();
+    if (game_state == INTRO) {
+        if (!update_camera(&camera))
+            game_state = RESET;
+    }
 
     ctx = update_contexts;
 
