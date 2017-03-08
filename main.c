@@ -262,6 +262,8 @@ check_ball_brick_collision(struct ball *b, struct level *l)
         if (bb_intersects(&b->box, &brick->box)) {
             ball_set_direction(ball, -b->angle);
             if (brick->type == NORMAL) {
+                ++game_context.points;
+                printf("Current score: %d\n", game_context.points);
                 brick_set_alive(brick, GL_FALSE);
                 explosions_create(explosions, b->x, b->y, 2.0);
             }
