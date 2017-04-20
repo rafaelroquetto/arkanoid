@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <time.h>
+#include <strings.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -22,16 +23,17 @@
 #include "explosion.h"
 #include "explosions.h"
 #include "camera.h"
+#include "font.h"
+#include "label.h"
 
 static GLFWwindow *window = NULL;
 
 static struct pad *pad = NULL;
-
 static struct level *level = NULL;
-
 static struct ball *ball = NULL;
-
 static struct list *explosions = NULL;
+static struct font *font = NULL;
+static struct label *score_label = NULL;
 
 static struct {
     int level;
@@ -234,6 +236,17 @@ calculate_new_angle(struct ball *b, struct pad *p)
     return MAX_ANGLE * (1 - angle_factor);
 }
 
+static void set_score(int score)
+{
+    static char buf[32];
+
+    bzero(buf, sizeof buf);
+
+    snprintf(buf, sizeof (buf), "%d", score);
+
+    label_set_text(score_label, buf);
+}
+
 static void
 check_ball_pad_collision(struct ball *b, struct pad *p)
 {
@@ -263,7 +276,7 @@ check_ball_brick_collision(struct ball *b, struct level *l)
             ball_set_direction(ball, -b->angle);
             if (brick->type == NORMAL) {
                 ++game_context.points;
-                printf("Current score: %d\n", game_context.points);
+                set_score(game_context.points);
                 brick_set_alive(brick, GL_FALSE);
                 explosions_create(explosions, b->x, b->y, 2.0);
             }
@@ -320,6 +333,7 @@ static struct draw_ctx draw_contexts[] = {
     { level_draw, (void **) &level },
     { ball_draw, (void **) &ball },
     { explosions_draw, (void **) &explosions },
+    { label_draw, (void **) &score_label },
     { NULL }
 };
 
@@ -366,6 +380,12 @@ draw(GLuint shader_program)
 }
 
 static void
+load_font(void)
+{
+    font = font_new("ngage");
+}
+
+static void
 init_objects(void)
 {
     assert(pad == NULL);
@@ -377,6 +397,10 @@ init_objects(void)
     ball = ball_new();
 
     explosions = explosions_new();
+
+    load_font();
+
+    score_label = label_new("0000", 11.0, 1.0, font);
 }
 
 static void
@@ -391,6 +415,10 @@ free_objects(void)
     ball_free(ball);
 
     explosions_free(explosions);
+
+    label_destroy(score_label);
+
+    font_destroy(font);
 }
 
 static void

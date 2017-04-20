@@ -20,11 +20,13 @@ const int BALL         = 2;
 const int PARTICLE     = 3;
 const int BOUNDINGBOX  = 4;
 const int HARD_BRICK   = 5;
+const int GLYPH        = 6;
 
 vec4 getObjectColor()
 {
     switch (objectType) {
     case PAD:
+    case GLYPH:
         return texture(padTexture, TexCoord);
     case BRICK:
         return vec4(gl_FragCoord.x/viewWidth, gl_FragCoord.y/viewHeight, gl_FragCoord.x/gl_FragCoord.y, 1.0);
