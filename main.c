@@ -276,7 +276,6 @@ check_ball_brick_collision(struct ball *b, struct level *l)
             ball_set_direction(ball, -b->angle);
             if (brick->type == NORMAL) {
                 ++game_context.points;
-                set_score(game_context.points);
                 brick_set_alive(brick, GL_FALSE);
                 explosions_create(explosions, b->x, b->y, 2.0);
             }
@@ -318,6 +317,8 @@ update(void)
         ctx->func(*ctx->object);
         ++ctx;
     }
+
+    set_score(game_context.points);
 }
 
 typedef void (*draw_func)(void *object, GLuint shader_program);

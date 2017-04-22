@@ -103,7 +103,7 @@ mesh_new(struct model *model)
 
     /* textures */
     glVertexAttribPointer(TEXTURE_VAO, 2, GL_FLOAT, GL_TRUE,
-            8 * sizeof (GLfloat), (GLvoid *) (5 * sizeof (GLfloat)));
+            8 * sizeof (GLfloat), (GLvoid *) (6 * sizeof (GLfloat)));
 
     glEnableVertexAttribArray(TEXTURE_VAO);
 
