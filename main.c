@@ -34,6 +34,8 @@ static struct ball *ball = NULL;
 static struct list *explosions = NULL;
 static struct font *font = NULL;
 static struct label *score_label = NULL;
+static struct label *level_label = NULL;
+static struct label *lives_label = NULL;
 
 static struct {
     int level;
@@ -131,9 +133,7 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
         } else if (key == GLFW_KEY_UP) {
             pad_state |= PAD_UP;
         } else if (key == GLFW_KEY_SPACE) {
-            if (game_state == RUNNING)
-                reset_game();
-            else
+            if (game_state != RUNNING)
                 start_game();
         } else if (key == GLFW_KEY_W) {
             camera.z += CAMERA_STEP;
@@ -249,15 +249,34 @@ calculate_new_angle(struct ball *b, struct pad *p)
     return MAX_ANGLE * (1 - angle_factor);
 }
 
-static void set_score(int score)
+static void
+set_score(int score)
 {
     static char buf[32];
 
     bzero(buf, sizeof buf);
-
     snprintf(buf, sizeof (buf), "%d", score);
-
     label_set_text(score_label, buf);
+}
+
+static void
+set_level_label(int level)
+{
+    static char buf[16];
+
+    bzero(buf, sizeof buf);
+    snprintf(buf, sizeof buf, "Level %d", level);
+    label_set_text(level_label, buf);
+}
+
+static void
+set_lives(int lives)
+{
+    static char buf[32];
+
+    bzero(buf, sizeof buf);
+    snprintf(buf, sizeof (buf), "Lives %d", lives);
+    label_set_text(lives_label, buf);
 }
 
 static void
@@ -310,7 +329,6 @@ check_level_complete(void)
             return;
     }
 
-    printf("Level complete!");
     load_level(++game_context.level);
     reset_ball();
     reset_to_intro();
@@ -321,6 +339,25 @@ check_collisions(void)
 {
     check_ball_pad_collision(ball, pad);
     check_ball_brick_collision(ball, level);
+}
+
+static void
+check_ball_bounds(void)
+{
+    if (ball->y >= 0)
+        return;
+
+    --game_context.lives;
+    reset_ball();
+    reset_pad();
+
+    game_state = RESET;
+}
+
+static void
+check_lives(void)
+{
+    /* FIXME */
 }
 
 static void
@@ -338,6 +375,8 @@ update(void)
 
     check_collisions();
     check_level_complete();
+    check_ball_bounds();
+    check_lives();
 
     if (game_state == INTRO) {
         if (!update_camera(&camera))
@@ -352,6 +391,8 @@ update(void)
     }
 
     set_score(game_context.points);
+    set_level_label(game_context.level);
+    set_lives(game_context.lives);
 }
 
 typedef void (*draw_func)(void *object, GLuint shader_program);
@@ -368,6 +409,8 @@ static struct draw_ctx draw_contexts[] = {
     { ball_draw, (void **) &ball },
     { explosions_draw, (void **) &explosions },
     { label_draw, (void **) &score_label },
+    { label_draw, (void **) &level_label },
+    { label_draw, (void **) &lives_label },
     { NULL }
 };
 
@@ -434,6 +477,8 @@ init_objects(void)
     load_font();
 
     score_label = label_new("0000", 11.0, 1.0, font);
+    level_label = label_new("Level 0", -15.0, 31.0, font);
+    lives_label = label_new("Lives 0", 8.0, 31.0, font);
 }
 
 static void
@@ -450,6 +495,8 @@ free_objects(void)
     explosions_free(explosions);
 
     label_destroy(score_label);
+    label_destroy(level_label);
+    label_destroy(lives_label);
 
     font_destroy(font);
 }

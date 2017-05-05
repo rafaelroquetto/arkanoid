@@ -121,7 +121,10 @@ void label_draw(void *object, GLuint shader_program)
     while (*ch) {
         struct glyph *g;
         g = find_glyph(l->font->glyphs, *ch);
-        glyph_draw(g, x, l->y, shader_program);
+
+        if (g != NULL)
+            glyph_draw(g, x, l->y, shader_program);
+
         ++ch;
         x += 1.2f;
     }
