@@ -166,6 +166,19 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
     }
 }
 
+static void
+load_level(int l)
+{
+    static char filename[32];
+
+    snprintf(filename, sizeof filename, "levels/level%d.lvl", l);
+
+    if (level != NULL)
+        level_free(level);
+
+    level = level_from_file(filename);
+}
+
 static GLFWwindow *
 create_window(void)
 {
@@ -285,7 +298,26 @@ check_ball_brick_collision(struct ball *b, struct level *l)
 }
 
 static void
-check_collisions()
+check_level_complete(void)
+{
+    struct node *n;
+    struct brick *brick;
+
+    for (n = level->bricks->first; n; n = n->next) {
+        brick = (struct brick *) n->data;
+
+        if (brick->alive)
+            return;
+    }
+
+    printf("Level complete!");
+    load_level(++game_context.level);
+    reset_ball();
+    reset_to_intro();
+}
+
+static void
+check_collisions(void)
 {
     check_ball_pad_collision(ball, pad);
     check_ball_brick_collision(ball, level);
@@ -305,6 +337,7 @@ update(void)
         ball->x = pad->x;
 
     check_collisions();
+    check_level_complete();
 
     if (game_state == INTRO) {
         if (!update_camera(&camera))
@@ -386,14 +419,13 @@ load_font(void)
     font = font_new("ngage");
 }
 
+
 static void
 init_objects(void)
 {
     assert(pad == NULL);
 
     pad = pad_new();
-
-    level = level_from_file("levels/level1.lvl");
 
     ball = ball_new();
 
@@ -462,6 +494,8 @@ int main(int argc, char *argv[])
     init_objects();
 
     reset_game();
+
+    load_level(game_context.level);
 
     reset_to_intro();
 
