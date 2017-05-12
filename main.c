@@ -105,7 +105,7 @@ static void
 start_game(void)
 {
     game_state = RUNNING;
-    ball_set_speed(ball, 0.2);
+    ball_set_speed(ball, 0.35);
 }
 
 static void

@@ -14,7 +14,7 @@
 
 static const GLfloat PAD_THROTTLE = 0.3f;
 static const GLfloat MAX_SPEED = 1.7f;
-static const GLfloat PAD_FRICTION = 0.1f;
+static const GLfloat PAD_FRICTION = 0.19f;
 static const GLfloat SCALE_FACTOR = 0.4;
 static const GLfloat MAX_SPRING = 0.4;
 static const GLfloat SPRING_FORCE = 0.1;
