@@ -25,6 +25,7 @@
 #include "camera.h"
 #include "font.h"
 #include "label.h"
+#include "oggplayer.h"
 
 static GLFWwindow *window = NULL;
 
@@ -36,6 +37,8 @@ static struct font *font = NULL;
 static struct label *score_label = NULL;
 static struct label *level_label = NULL;
 static struct label *lives_label = NULL;
+//static struct ogg_context *soundtrack = NULL;
+static struct ogg_context *collision_sfx = NULL;
 
 static struct {
     int level;
@@ -217,6 +220,24 @@ init_glfw(void)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
+static void
+init_sound(void)
+{
+    ogg_init();
+
+    //soundtrack = ogg_context_open("soundtrack.ogg");
+    collision_sfx = ogg_context_open("sfx/collision.ogg");
+}
+
+static void
+deinit_sound(void)
+{
+    //ogg_context_free(soundtrack);
+    ogg_context_free(collision_sfx);
+
+    ogg_release();
+}
+
 typedef void (*update_func)(void *object);
 
 struct update_ctx
@@ -230,6 +251,7 @@ static struct update_ctx update_contexts[] = {
     { level_update, (void **) &level },
     { ball_update, (void **) &ball },
     { explosions_update, (void **) &explosions },
+    { ogg_context_update, (void **) &collision_sfx },
     { NULL }
 };
 
@@ -310,6 +332,7 @@ check_ball_brick_collision(struct ball *b, struct level *l)
                 ++game_context.points;
                 brick_set_alive(brick, GL_FALSE);
                 explosions_create(explosions, b->x, b->y, 2.0);
+                ogg_context_start(collision_sfx);
             }
             break;
         }
@@ -538,6 +561,8 @@ int main(int argc, char *argv[])
 
     init_glfw();
 
+    init_sound();
+
     init_objects();
 
     reset_game();
@@ -549,6 +574,8 @@ int main(int argc, char *argv[])
     handle_events();
 
     free_objects();
+
+    deinit_sound();
 
     glfwTerminate();
 
