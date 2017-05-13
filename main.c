@@ -39,6 +39,7 @@ static struct label *level_label = NULL;
 static struct label *lives_label = NULL;
 //static struct ogg_context *soundtrack = NULL;
 static struct ogg_context *collision_sfx = NULL;
+static struct ogg_context *bounce_sfx = NULL;
 
 static struct {
     int level;
@@ -58,6 +59,7 @@ enum {
 
 enum state {
     INTRO,
+    RESETTING,
     RESET,
     RUNNING
 };
@@ -78,8 +80,15 @@ reset_ball(void)
 static void
 reset_pad(void)
 {
-    pad->speed = 0.0;
-    pad->x = 0.0;
+    if (!fuzzy_compare(pad->x, 0.0)) {
+        if (pad->x > 0)
+            pad_throttle_left(pad);
+        else
+            pad_throttle_right(pad);
+    } else {
+        game_state = RESET;
+    }
+
     ball->x = pad->x;
     ball->y = 0.7;
     ball->z = 0.0;
@@ -227,6 +236,7 @@ init_sound(void)
 
     //soundtrack = ogg_context_open("soundtrack.ogg");
     collision_sfx = ogg_context_open("sfx/collision.ogg");
+    bounce_sfx = ogg_context_open("sfx/bounce.ogg");
 }
 
 static void
@@ -234,6 +244,7 @@ deinit_sound(void)
 {
     //ogg_context_free(soundtrack);
     ogg_context_free(collision_sfx);
+    ogg_context_free(bounce_sfx);
 
     ogg_release();
 }
@@ -252,6 +263,7 @@ static struct update_ctx update_contexts[] = {
     { ball_update, (void **) &ball },
     { explosions_update, (void **) &explosions },
     { ogg_context_update, (void **) &collision_sfx },
+    { ogg_context_update, (void **) &bounce_sfx },
     { NULL }
 };
 
@@ -304,12 +316,13 @@ set_lives(int lives)
 static void
 check_ball_pad_collision(struct ball *b, struct pad *p)
 {
-    if (game_state == RESET)
+    if (game_state != RUNNING)
         return;
 
     if (bb_intersects_top(&b->box, &p->box)) {
         ball_set_direction(ball, calculate_new_angle(b, p));
         pad_bump(p);
+        ogg_context_start(bounce_sfx);
     }
 }
 
@@ -319,6 +332,9 @@ check_ball_brick_collision(struct ball *b, struct level *l)
 {
     struct node *n;
     struct brick *brick;
+
+    if (game_state != RUNNING)
+        return;
 
     for (n = level->bricks->first; n; n = n->next) {
         brick = (struct brick *) n->data;
@@ -372,9 +388,8 @@ check_ball_bounds(void)
 
     --game_context.lives;
     reset_ball();
-    reset_pad();
 
-    game_state = RESET;
+    game_state = RESETTING;
 }
 
 static void
@@ -404,6 +419,8 @@ update(void)
     if (game_state == INTRO) {
         if (!update_camera(&camera))
             game_state = RESET;
+    } else if (game_state == RESETTING) {
+        reset_pad();
     }
 
     ctx = update_contexts;

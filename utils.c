@@ -12,7 +12,7 @@ deg_to_rad(float deg)
 int
 fuzzy_compare(double a, double b)
 {
-    static const double EPSILON = 0.001;
+    static const double EPSILON = 0.1;
 
     return (int)((float)fabs(a - b) < EPSILON);
 }
