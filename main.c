@@ -37,6 +37,7 @@ static struct font *font = NULL;
 static struct label *score_label = NULL;
 static struct label *level_label = NULL;
 static struct label *lives_label = NULL;
+static struct label *gameover_label = NULL;
 //static struct ogg_context *soundtrack = NULL;
 static struct ogg_context *collision_sfx = NULL;
 static struct ogg_context *bounce_sfx = NULL;
@@ -111,11 +112,17 @@ reset_game(void)
     reset_pad();
     reset_camera(&camera);
     reset_game_context();
+
+    label_set_visible(gameover_label, 0);
 }
 
 static void
 start_game(void)
 {
+    if (game_context.lives == 0) {
+        reset_game();
+    }
+
     game_state = RUNNING;
     ball_set_speed(ball, 0.35);
 }
@@ -390,6 +397,10 @@ check_ball_bounds(void)
     reset_ball();
 
     game_state = RESETTING;
+
+    if (game_context.lives == 0) {
+        label_set_visible(gameover_label, 1);
+    }
 }
 
 static void
@@ -451,6 +462,7 @@ static struct draw_ctx draw_contexts[] = {
     { label_draw, (void **) &score_label },
     { label_draw, (void **) &level_label },
     { label_draw, (void **) &lives_label },
+    { label_draw, (void **) &gameover_label },
     { NULL }
 };
 
@@ -519,6 +531,9 @@ init_objects(void)
     score_label = label_new("0000", 11.0, 1.0, font);
     level_label = label_new("Level 0", -15.0, 31.0, font);
     lives_label = label_new("Lives 0", 8.0, 31.0, font);
+    gameover_label = label_new("LOSER!", -2.0, 15.0, font);
+
+    label_set_visible(gameover_label, 0);
 }
 
 static void
@@ -537,6 +552,7 @@ free_objects(void)
     label_destroy(score_label);
     label_destroy(level_label);
     label_destroy(lives_label);
+    label_destroy(gameover_label);
 
     font_destroy(font);
 }
