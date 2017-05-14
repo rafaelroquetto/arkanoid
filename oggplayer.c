@@ -126,8 +126,13 @@ ogg_context_free(struct ogg_context *ctx)
 
     int i;
 
-    for (i = 0; i < NBUFFERS; ++i)
+    for (i = 0; i < NBUFFERS; ++i) {
         alDeleteBuffers(1, &ctx->buffers[i].id);
+
+        if (ctx->buffers[i].data != NULL)
+            byte_array_free(ctx->buffers[i].data);
+    }
+
 
     free(ctx);
 }
