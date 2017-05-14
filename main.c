@@ -38,7 +38,7 @@ static struct label *score_label = NULL;
 static struct label *level_label = NULL;
 static struct label *lives_label = NULL;
 static struct label *gameover_label = NULL;
-//static struct ogg_context *soundtrack = NULL;
+static struct ogg_context *soundtrack = NULL;
 static struct ogg_context *collision_sfx = NULL;
 static struct ogg_context *bounce_sfx = NULL;
 
@@ -104,6 +104,9 @@ reset_game_context(void)
 }
 
 static void
+load_level(int l);
+
+static void
 reset_game(void)
 {
     game_state = RESET;
@@ -112,6 +115,8 @@ reset_game(void)
     reset_pad();
     reset_camera(&camera);
     reset_game_context();
+
+    //load_level(game_context.level);
 
     label_set_visible(gameover_label, 0);
 }
@@ -241,7 +246,7 @@ init_sound(void)
 {
     ogg_init();
 
-    //soundtrack = ogg_context_open("soundtrack.ogg");
+    soundtrack = ogg_context_open("sfx/soundtrack.ogg");
     collision_sfx = ogg_context_open("sfx/collision.ogg");
     bounce_sfx = ogg_context_open("sfx/bounce.ogg");
 }
@@ -249,7 +254,7 @@ init_sound(void)
 static void
 deinit_sound(void)
 {
-    //ogg_context_free(soundtrack);
+    ogg_context_free(soundtrack);
     ogg_context_free(collision_sfx);
     ogg_context_free(bounce_sfx);
 
@@ -271,6 +276,7 @@ static struct update_ctx update_contexts[] = {
     { explosions_update, (void **) &explosions },
     { ogg_context_update, (void **) &collision_sfx },
     { ogg_context_update, (void **) &bounce_sfx },
+    { ogg_context_update, (void **) &soundtrack },
     { NULL }
 };
 
@@ -603,6 +609,8 @@ int main(int argc, char *argv[])
     load_level(game_context.level);
 
     reset_to_intro();
+
+    ogg_context_start(soundtrack);
 
     handle_events();
 
