@@ -17,6 +17,7 @@ enum coord_offset {
 
 enum offsets {
     COORD_STRIDE = 3,
+    TEX_COORD_STRIDE = 2,
     INDEX_STRIDE = 3,
     VERTEX_OFFSET = 0,
     TEXTURE_OFFSET = 1,

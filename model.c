@@ -257,7 +257,7 @@ texture_coord(const GLfloat *texture_data, const GLuint *index_data,
 {
     const unsigned int offset = vertex * INDEX_STRIDE + TEXTURE_OFFSET;
     const unsigned int texture_index = index_data[offset] - 1; /* 0-based indices */
-    const unsigned int texture_offset = texture_index * COORD_STRIDE + coord;
+    const unsigned int texture_offset = texture_index * TEX_COORD_STRIDE + coord;
 
     return texture_data[texture_offset];
 }
@@ -294,6 +294,7 @@ setup_model(struct model *m, struct byte_array *vertices,
 
     /* size of vertices + size of normals */
     buffer = (GLfloat *) malloc(buffer_size);
+    memset(buffer, 0, buffer_size);
 
     for (current_coord = i = 0; i < nvertex; ++i) {
         buffer[current_coord++] = vertex_coord(vertex_data, index_data, COORD_X, i);
