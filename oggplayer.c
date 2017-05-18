@@ -224,7 +224,11 @@ ogg_context_close(struct ogg_context *ctx)
 void
 ogg_context_update(void *obj)
 {
+    if (obj == NULL)
+        return;
+
     struct ogg_context *ctx = (struct ogg_context *) obj;
+
     if (!ctx->playing)
         return;
 

@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <strings.h>
+#include <string.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -72,6 +73,8 @@ static unsigned game_state;
 
 static struct camera camera;
 
+static int megahits = 0;
+
 static void
 reset_ball(void)
 {
@@ -108,6 +111,9 @@ static void
 load_level(int l);
 
 static void
+force_level_complete(void);
+
+static void
 reset_game(void)
 {
     game_state = RESET;
@@ -117,7 +123,7 @@ reset_game(void)
     reset_camera(&camera);
     reset_game_context();
 
-    //load_level(game_context.level);
+    load_level(game_context.level);
 
     label_set_visible(gameover_label, 0);
 }
@@ -174,6 +180,8 @@ handle_kbd(GLFWwindow *window, int key, int scancode, int action, int mode)
             camera.y -= CAMERA_STEP;
         } else if (key == GLFW_KEY_R) {
             camera.angle += CAMERA_STEP;
+        } else if (key == GLFW_KEY_L) {
+            force_level_complete();
         }
 
         break;
@@ -205,13 +213,15 @@ load_level(int l)
 
     snprintf(filename, sizeof filename, "sfx/level%d.ogg", l);
 
-    if (level_sfx != NULL)
+    if (level_sfx != NULL) {
         ogg_context_free(level_sfx);
+        level_sfx = NULL;
+    }
 
-    level_sfx = ogg_context_open(filename);
-
-    if (level_sfx != NULL)
+    if (access(filename, R_OK) == 0) {
+        level_sfx = ogg_context_open(filename);
         ogg_context_start(level_sfx);
+    }
 }
 
 static GLFWwindow *
@@ -395,6 +405,19 @@ check_level_complete(void)
     }
 
     load_level(++game_context.level);
+    game_context.lives = 3;
+    reset_ball();
+    reset_to_intro();
+}
+
+static void
+force_level_complete(void)
+{
+    if (!megahits)
+        return;
+
+    load_level(++game_context.level);
+    game_context.lives = 3;
     reset_ball();
     reset_to_intro();
 }
@@ -609,6 +632,11 @@ handle_events(void)
 
 int main(int argc, char *argv[])
 {
+    if (argc == 2) {
+        if (strcmp(argv[1], "megahits") == 0)
+            megahits = 1;
+    }
+
     srand(time(NULL));
 
     init_glfw();
