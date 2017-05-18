@@ -41,6 +41,7 @@ static struct label *gameover_label = NULL;
 static struct ogg_context *soundtrack = NULL;
 static struct ogg_context *collision_sfx = NULL;
 static struct ogg_context *bounce_sfx = NULL;
+static struct ogg_context *level_sfx = NULL;
 
 static struct {
     int level;
@@ -201,6 +202,16 @@ load_level(int l)
         level_free(level);
 
     level = level_from_file(filename);
+
+    snprintf(filename, sizeof filename, "sfx/level%d.ogg", l);
+
+    if (level_sfx != NULL)
+        ogg_context_free(level_sfx);
+
+    level_sfx = ogg_context_open(filename);
+
+    if (level_sfx != NULL)
+        ogg_context_start(level_sfx);
 }
 
 static GLFWwindow *
@@ -257,6 +268,7 @@ deinit_sound(void)
     ogg_context_free(soundtrack);
     ogg_context_free(collision_sfx);
     ogg_context_free(bounce_sfx);
+    ogg_context_free(level_sfx);
 
     ogg_release();
 }
@@ -277,6 +289,7 @@ static struct update_ctx update_contexts[] = {
     { ogg_context_update, (void **) &collision_sfx },
     { ogg_context_update, (void **) &bounce_sfx },
     { ogg_context_update, (void **) &soundtrack },
+    { ogg_context_update, (void **) &level_sfx },
     { NULL }
 };
 
