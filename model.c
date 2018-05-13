@@ -73,16 +73,16 @@ byte_array_get_next_line(struct byte_array *b)
     if (*ptr == '\0')
         return NULL;
 
-    newline = strchrnul(ptr, '\n');
-
-    *newline = '\0';
-
     ret = ptr;
 
-    if (newline == '\0')
+    newline = strchrnul(ptr, '\n');
+
+    if (*newline == '\0')
         ptr = newline;
     else
         ptr = newline + 1;
+
+    *newline = '\0';
 
     return ret;
 }
